@@ -1,5 +1,5 @@
 import "./App.css";
-import { MantineProvider, Blockquote } from "@mantine/core";
+import { MantineProvider, Blockquote, Title } from "@mantine/core";
 
 function App() {
   return (
@@ -8,18 +8,18 @@ function App() {
       withNormalizeCSS
       theme={{ colorScheme: "light" }}
     >
-      <Blockquote
+      <div
         style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          marginTop: "-50px",
-          marginLeft: "-150px",
+          display: "flex",
+          justifyContent: "center",
+          paddingTop: "30px",
         }}
-        cite="– Mariusz Pudzianowski"
       >
-        To by nic nie dało
-      </Blockquote>
+        <Title>Hello there</Title>
+        <Blockquote cite="– Mariusz Pudzianowski">
+          To by nic nie dało
+        </Blockquote>
+      </div>
     </MantineProvider>
   );
 }
