@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,6 +34,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User addUser(User user) {
         user.setId(0);
+        if (user.getPassword().length() < 3 || Objects.equals(user.getFirstName(), "")
+                || Objects.equals(user.getLastName(), "") || user.getLogin().length() < 3)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ("Passed data is invalid"));
         return userRepository.save(user);
     }
 
