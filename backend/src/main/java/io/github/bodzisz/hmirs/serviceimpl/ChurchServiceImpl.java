@@ -1,7 +1,9 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
 import io.github.bodzisz.hmirs.entity.Church;
+import io.github.bodzisz.hmirs.entity.HolyMass;
 import io.github.bodzisz.hmirs.repository.ChurchRepository;
+import io.github.bodzisz.hmirs.repository.HolyMassRepository;
 import io.github.bodzisz.hmirs.service.ChurchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,8 +16,12 @@ import java.util.Optional;
 public class ChurchServiceImpl implements ChurchService {
 
     private final ChurchRepository churchRepository;
+    private final HolyMassRepository holyMassRepository;
 
-    public ChurchServiceImpl(ChurchRepository churchRepository){this.churchRepository = churchRepository;}
+    public ChurchServiceImpl(ChurchRepository churchRepository, HolyMassRepository holyMassRepository){
+        this.churchRepository = churchRepository;
+        this.holyMassRepository = holyMassRepository;
+    }
 
     @Override
     public List<Church> getChurches() {
@@ -58,5 +64,11 @@ public class ChurchServiceImpl implements ChurchService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Church of id=%d was not found", id));
         }
+    }
+
+    @Override
+    public List<HolyMass> getHolyMasses(final int id) throws ResponseStatusException{
+        Church church = getChurch(id);
+        return holyMassRepository.findHolyMassByChurch(church);
     }
 }
