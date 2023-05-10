@@ -30,7 +30,7 @@ public class ChurchController {
 
     @PostMapping
     public ResponseEntity<Church> postChurch(@RequestBody final Church church) {
-        return ResponseEntity.ok(churchRepository.save(church));
+        return ResponseEntity.status(201).body(churchRepository.save(church));
     }
 
     @DeleteMapping("/{id}")
@@ -39,7 +39,7 @@ public class ChurchController {
     }
 
     @PutMapping("/{id}")
-    public Church updateChurch(@PathVariable int id, @RequestBody Church updatedChurch) {
+    public ResponseEntity<Void> updateChurch(@PathVariable int id, @RequestBody Church updatedChurch) {
         Church existingChurch = churchRepository.findById(id).orElse(null);
         if (existingChurch != null) {
             existingChurch.setName(updatedChurch.getName());
@@ -48,6 +48,6 @@ public class ChurchController {
             existingChurch.setParish(updatedChurch.getParish());
             churchRepository.save(existingChurch);
         }
-        return existingChurch;
+        return ResponseEntity.status(204).build();
     }
 }
