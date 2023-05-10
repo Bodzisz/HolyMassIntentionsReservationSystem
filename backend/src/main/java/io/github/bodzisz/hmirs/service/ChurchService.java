@@ -13,5 +13,5 @@ public interface ChurchService {
 
     Church deleteChurch(final int id);
 
-    void updateChurch(final Church church);
+    void updateChurch(final int id, final Church church);
 }

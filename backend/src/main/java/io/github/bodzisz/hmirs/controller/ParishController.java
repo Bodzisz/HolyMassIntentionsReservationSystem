@@ -2,6 +2,8 @@ package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Parish;
 import io.github.bodzisz.hmirs.repository.ParishRepository;
+import io.github.bodzisz.hmirs.service.ParishService;
+import io.github.bodzisz.hmirs.serviceimpl.ParishServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,40 +14,35 @@ import java.util.List;
 @RequestMapping("/parishes")
 public class ParishController {
 
-    private final ParishRepository parishRepository;
+    private final ParishService parishService;
 
     public ParishController(ParishRepository parishRepository) {
-        this.parishRepository = parishRepository;
+        parishService = new ParishServiceImpl(parishRepository);
     }
 
     @GetMapping
     public ResponseEntity<List<Parish>> getParishes() {
-        return ResponseEntity.ok(parishRepository.findAll());
+        return ResponseEntity.ok(parishService.getParishes());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<Parish>> getParish(@PathVariable final int id) {
-        return ResponseEntity.ok(parishRepository.findAllById(Collections.singleton(id)));
+    public ResponseEntity<Parish> getParish(@PathVariable final int id) {
+        return ResponseEntity.ok(parishService.getParish(id));
     }
 
     @PostMapping
     public ResponseEntity<Parish> postParish(@RequestBody final Parish parish) {
-        return ResponseEntity.ok(parishRepository.save(parish));
+        return ResponseEntity.ok(parishService.addParish(parish));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteParish(@PathVariable int id) {
-        parishRepository.deleteById(id);
+    public ResponseEntity<Parish> deleteParish(@PathVariable int id) {
+        return ResponseEntity.status(201).body(parishService.deleteParish(id));
     }
     
     @PutMapping("/{id}")
-    public Parish updateParish(@PathVariable int id, @RequestBody Parish updatedParish) {
-        Parish existingParish = parishRepository.findById(id).orElse(null);
-        if (existingParish != null) {
-            existingParish.setName(updatedParish.getName());
-            existingParish.setMainPriest(updatedParish.getMainPriest());
-            parishRepository.save(existingParish);
-        }
-        return existingParish;
+    public ResponseEntity<Void> updateParish(@PathVariable int id, @RequestBody Parish updatedParish) {
+        parishService.updateParish(id, updatedParish);
+        return ResponseEntity.status(204).build();
     }
 }

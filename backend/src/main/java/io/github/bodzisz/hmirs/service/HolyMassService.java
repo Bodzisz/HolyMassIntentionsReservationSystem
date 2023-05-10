@@ -14,5 +14,5 @@ public interface HolyMassService {
 
     HolyMass deleteHolyMass(final int id);
 
-    void updateHolyMass(final HolyMass holyMass);
+    void updateHolyMass(final int id, final HolyMass holyMass);
 }

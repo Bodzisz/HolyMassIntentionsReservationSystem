@@ -13,5 +13,5 @@ public interface IntentionService {
     
     Intention deleteIntention(final int id);
     
-    void updateIntention(final Intention intention);
+    void updateIntention(final int id, final Intention intention);
 }

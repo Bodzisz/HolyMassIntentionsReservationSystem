@@ -13,5 +13,5 @@ public interface DonationsService {
     
     Donation deleteDonation(final int id);
     
-    void updateDonation(final Donation donation);
+    void updateDonation(final int id, final Donation donation);
 }

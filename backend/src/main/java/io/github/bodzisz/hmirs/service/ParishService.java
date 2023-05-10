@@ -13,5 +13,5 @@ public interface ParishService {
 
     Parish deleteParish(final int id);
 
-    void updateParish(final Parish parish);
+    void updateParish(final int id, final Parish parish);
 }
