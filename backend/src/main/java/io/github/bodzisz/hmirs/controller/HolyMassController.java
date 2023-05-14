@@ -1,9 +1,7 @@
 package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.HolyMass;
-import io.github.bodzisz.hmirs.repository.HolyMassRepository;
 import io.github.bodzisz.hmirs.service.HolyMassService;
-import io.github.bodzisz.hmirs.serviceimpl.HolyMassServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +13,8 @@ public class HolyMassController {
 
     private final HolyMassService holyMassService;
 
-    public HolyMassController(HolyMassRepository holyMassRepository) {
-        holyMassService = new HolyMassServiceImpl(holyMassRepository);
+    public HolyMassController(HolyMassService holyMassService) {
+        this.holyMassService = holyMassService;
     }
 
     @GetMapping
@@ -37,6 +35,12 @@ public class HolyMassController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHolyMass(@PathVariable int id) {
         holyMassService.deleteHolyMass(id);
+        return ResponseEntity.status(204).build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateUser(@PathVariable int id, @RequestBody HolyMass updatedHolyMass) {
+        holyMassService.updateHolyMass(id, updatedHolyMass);
         return ResponseEntity.status(204).build();
     }
 

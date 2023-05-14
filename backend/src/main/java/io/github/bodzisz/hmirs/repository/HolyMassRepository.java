@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface HolyMassRepository extends JpaRepository<HolyMass, Integer> {
-    List<HolyMass> findHolyMassByChurch(Church church);
+    List<HolyMass> findHolyMassesByChurch(Church church);
 }

@@ -1,9 +1,7 @@
 package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Intention;
-import io.github.bodzisz.hmirs.repository.IntentionRepository;
 import io.github.bodzisz.hmirs.service.IntentionService;
-import io.github.bodzisz.hmirs.serviceimpl.IntentionServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +13,8 @@ public class IntentionController {
 
     private final IntentionService intentionService;
 
-    public IntentionController(IntentionRepository intentionRepository) {
-        intentionService = new IntentionServiceImpl(intentionRepository);
+    public IntentionController(IntentionService intentionService) {
+        this.intentionService = intentionService;
     }
 
     @GetMapping

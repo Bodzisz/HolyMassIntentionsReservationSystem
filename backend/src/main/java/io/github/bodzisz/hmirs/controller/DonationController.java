@@ -1,9 +1,7 @@
 package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Donation;
-import io.github.bodzisz.hmirs.repository.DonationsRepository;
 import io.github.bodzisz.hmirs.service.DonationsService;
-import io.github.bodzisz.hmirs.serviceimpl.DonationServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +13,8 @@ public class DonationController {
 
     private final DonationsService donationsService;
 
-    public DonationController(DonationsRepository donationRepository) {
-        donationsService= new DonationServiceImpl(donationRepository);
+    public DonationController(DonationsService donationsService) {
+        this.donationsService = donationsService;
     }
 
     @GetMapping

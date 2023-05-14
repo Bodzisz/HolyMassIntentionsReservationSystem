@@ -13,6 +13,8 @@ public interface ChurchService {
 
     Church getChurch(final int id);
 
+    List<Church> getChurchesByCity(final String city);
+
     Church addChurch(final Church church);
 
     Church deleteChurch(final int id);

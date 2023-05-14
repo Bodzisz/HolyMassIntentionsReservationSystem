@@ -1,13 +1,10 @@
 package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.User;
-import io.github.bodzisz.hmirs.repository.UserRepository;
 import io.github.bodzisz.hmirs.service.UserService;
-import io.github.bodzisz.hmirs.serviceimpl.UserServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -16,8 +13,8 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserRepository userRepository) {
-        userService = new UserServiceImpl(userRepository);
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping

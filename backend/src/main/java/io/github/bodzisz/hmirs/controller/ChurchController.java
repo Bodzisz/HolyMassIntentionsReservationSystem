@@ -2,10 +2,7 @@ package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
-import io.github.bodzisz.hmirs.repository.ChurchRepository;
-import io.github.bodzisz.hmirs.repository.HolyMassRepository;
 import io.github.bodzisz.hmirs.service.ChurchService;
-import io.github.bodzisz.hmirs.serviceimpl.ChurchServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +14,8 @@ public class ChurchController {
 
     private final ChurchService churchService;
 
-    public ChurchController(ChurchRepository churchRepository, HolyMassRepository holyMassRepository) {
-        churchService = new ChurchServiceImpl(churchRepository, holyMassRepository);
+    public ChurchController(ChurchService churchService) {
+        this.churchService = churchService;
     }
 
     @GetMapping
@@ -29,6 +26,11 @@ public class ChurchController {
     @GetMapping("/{id}")
     public ResponseEntity<Church> getChurch(@PathVariable final int id) {
         return ResponseEntity.ok(churchService.getChurch(id));
+    }
+
+    @GetMapping("/{city}")
+    public ResponseEntity<List<Church>> getChurchesByCity(@PathVariable final String city) {
+        return ResponseEntity.ok(churchService.getChurchesByCity(city));
     }
 
     @GetMapping("/{id}/holymasses")

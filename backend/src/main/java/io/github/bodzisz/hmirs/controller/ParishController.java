@@ -1,13 +1,10 @@
 package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Parish;
-import io.github.bodzisz.hmirs.repository.ParishRepository;
 import io.github.bodzisz.hmirs.service.ParishService;
-import io.github.bodzisz.hmirs.serviceimpl.ParishServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -16,8 +13,8 @@ public class ParishController {
 
     private final ParishService parishService;
 
-    public ParishController(ParishRepository parishRepository) {
-        parishService = new ParishServiceImpl(parishRepository);
+    public ParishController(ParishService parishService) {
+        this.parishService = parishService;
     }
 
     @GetMapping

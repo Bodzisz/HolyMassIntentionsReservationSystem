@@ -45,7 +45,7 @@ public class HolyMassServiceImpl implements HolyMassService {
     }
 
     @Override
-    public void updateHolyMass(final int id, HolyMass holyMass) {
+    public void updateHolyMass(final int id, final HolyMass holyMass) {
         HolyMass existingHolyMass = holyMassRepository.findById(id).orElse(null);
         if (existingHolyMass != null) {
             existingHolyMass.setDate(holyMass.getDate());

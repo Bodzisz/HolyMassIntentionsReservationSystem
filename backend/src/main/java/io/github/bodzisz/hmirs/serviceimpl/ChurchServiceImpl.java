@@ -69,6 +69,11 @@ public class ChurchServiceImpl implements ChurchService {
     @Override
     public List<HolyMass> getHolyMasses(final int id) throws ResponseStatusException{
         Church church = getChurch(id);
-        return holyMassRepository.findHolyMassByChurch(church);
+        return holyMassRepository.findHolyMassesByChurch(church);
+    }
+
+    @Override
+    public List<Church> getChurchesByCity(final String city){
+        return churchRepository.findChurchesByCity(city);
     }
 }
