@@ -28,7 +28,7 @@ public class ChurchController {
         return ResponseEntity.ok(churchService.getChurch(id));
     }
 
-    @GetMapping("/{city}")
+    @GetMapping("/city/{city}")
     public ResponseEntity<List<Church>> getChurchesByCity(@PathVariable final String city) {
         return ResponseEntity.ok(churchService.getChurchesByCity(city));
     }
