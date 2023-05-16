@@ -66,4 +66,9 @@ public class UserServiceImpl implements UserService {
                     String.format("User of id=%d was not found", id));
         }
     }
+
+    @Override
+    public boolean userExists(final String login){
+        return userRepository.findByLogin(login) == null;
+    }
 }

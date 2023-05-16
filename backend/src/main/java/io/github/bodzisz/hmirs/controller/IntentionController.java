@@ -2,8 +2,10 @@ package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.service.IntentionService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class IntentionController {
 
     @PostMapping
     public ResponseEntity<Intention> postIntention(@RequestBody final Intention intention) {
+        intentionCheck(intention);
         return ResponseEntity.ok(intentionService.addIntention(intention));
     }
 
@@ -39,8 +42,17 @@ public class IntentionController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateUser(@PathVariable int id, @RequestBody Intention updatedIntention) {
+        intentionCheck(updatedIntention);
         intentionService.updateIntention(id, updatedIntention);
         return ResponseEntity.status(204).build();
     }
 
+    private void intentionCheck(Intention intention){
+        if (intention.getContent() == null || intention.getContent().length() < 5)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid content");
+        if (intention.getUser() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user");
+        if (intention.getHolyMass() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid holy mass");
+    }
 }

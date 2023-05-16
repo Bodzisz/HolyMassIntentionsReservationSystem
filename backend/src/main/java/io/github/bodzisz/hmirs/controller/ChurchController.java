@@ -3,8 +3,10 @@ package io.github.bodzisz.hmirs.controller;
 import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
 import io.github.bodzisz.hmirs.service.ChurchService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -40,6 +42,7 @@ public class ChurchController {
 
     @PostMapping
     public ResponseEntity<Church> postChurch(@RequestBody final Church church) {
+        churchCheck(church);
         return ResponseEntity.status(201).body(churchService.addChurch(church));
     }
 
@@ -50,7 +53,17 @@ public class ChurchController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateChurch(@PathVariable int id, @RequestBody Church updatedChurch) {
+        churchCheck(updatedChurch);
         churchService.updateChurch(id, updatedChurch);
         return ResponseEntity.status(204).build();
+    }
+
+    private void churchCheck(Church church){
+        if (church.getCity() == null || church.getCity().length() < 3)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid city");
+        if (church.getName() == null || church.getName().length() < 3)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid name");
+        if (church.getParish() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid parish");
     }
 }

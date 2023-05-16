@@ -2,8 +2,10 @@ package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Donation;
 import io.github.bodzisz.hmirs.service.DonationsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class DonationController {
 
     @PostMapping
     public ResponseEntity<Donation> postDonation(@RequestBody final Donation donation) {
+        donationCheck(donation);
         return ResponseEntity.ok(donationsService.addDonation(donation));
     }
 
@@ -39,7 +42,17 @@ public class DonationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateDonation(@PathVariable int id, @RequestBody Donation updatedDonation) {
+        donationCheck(updatedDonation);
         donationsService.updateDonation(id, updatedDonation);
         return ResponseEntity.status(204).build();
+    }
+
+    private void donationCheck(Donation donation){
+        if (donation.getAmount() <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid donation size");
+        if (donation.getUser() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user");
+        if (donation.getParish() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid parish");
     }
 }
