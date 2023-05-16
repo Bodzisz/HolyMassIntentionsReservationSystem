@@ -1,7 +1,9 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
 import io.github.bodzisz.hmirs.entity.Parish;
+import io.github.bodzisz.hmirs.entity.User;
 import io.github.bodzisz.hmirs.repository.ParishRepository;
+import io.github.bodzisz.hmirs.repository.UserRepository;
 import io.github.bodzisz.hmirs.service.ParishService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,8 +16,13 @@ import java.util.Optional;
 public class ParishServiceImpl implements ParishService {
 
     private final ParishRepository parishRepository;
+    private final UserRepository userRepository;
 
-    public ParishServiceImpl(ParishRepository parishRepository){this.parishRepository = parishRepository;}
+    public ParishServiceImpl(ParishRepository parishRepository,
+                                UserRepository userRepository){
+        this.parishRepository = parishRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public List<Parish> getParishes() {
@@ -32,6 +39,11 @@ public class ParishServiceImpl implements ParishService {
 
     @Override
     public Parish addParish(Parish parish) {
+        int userId = parish.getMainPriest().getId();
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("User of id=%d was not found", userId));
+        parish.setMainPriest(user.get());
         return parishRepository.save(parish);
     }
 
@@ -48,8 +60,12 @@ public class ParishServiceImpl implements ParishService {
     public void updateParish(final int id, Parish parish) {
         Parish existingParish = parishRepository.findById(id).orElse(null);
         if (existingParish != null) {
+            int userId = parish.getMainPriest().getId();
+            Optional<User> user = userRepository.findById(userId);
+            if (user.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("User of id=%d was not found", userId));
+            existingParish.setMainPriest(user.get());
             existingParish.setName(parish.getName());
-            existingParish.setMainPriest(parish.getMainPriest());
             parishRepository.save(existingParish);
         }
         else{

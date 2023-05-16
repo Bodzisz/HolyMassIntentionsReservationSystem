@@ -44,8 +44,8 @@ public class ChurchController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteChurch(@PathVariable int id) {
-        churchService.deleteChurch(id);
+    public ResponseEntity<Church> deleteChurch(@PathVariable int id) {
+        return ResponseEntity.status(201).body(churchService.deleteChurch(id));
     }
 
     @PutMapping("/{id}")
