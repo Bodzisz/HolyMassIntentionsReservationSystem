@@ -1,0 +1,58 @@
+package io.github.bodzisz.hmirs.controller;
+
+import io.github.bodzisz.hmirs.entity.Intention;
+import io.github.bodzisz.hmirs.service.IntentionService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/intentions")
+public class IntentionController {
+
+    private final IntentionService intentionService;
+
+    public IntentionController(IntentionService intentionService) {
+        this.intentionService = intentionService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Intention>> getIntentions() {
+        return ResponseEntity.ok(intentionService.getIntentions());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Intention> getIntention(@PathVariable final int id) {
+        return ResponseEntity.ok(intentionService.getIntention(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<Intention> postIntention(@RequestBody final Intention intention) {
+        intentionCheck(intention);
+        return ResponseEntity.ok(intentionService.addIntention(intention));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Intention> deleteIntention(@PathVariable int id) {
+        return ResponseEntity.ok(intentionService.deleteIntention(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateUser(@PathVariable int id, @RequestBody Intention updatedIntention) {
+        intentionCheck(updatedIntention);
+        intentionService.updateIntention(id, updatedIntention);
+        return ResponseEntity.status(204).build();
+    }
+
+    private void intentionCheck(Intention intention){
+        if (intention.getContent() == null || intention.getContent().length() < 5)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid content");
+        if (intention.getUser() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user");
+        if (intention.getHolyMass() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid holy mass");
+    }
+}
