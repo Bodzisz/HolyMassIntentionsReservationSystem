@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/donations")
+@CrossOrigin(origins = "http://localhost:3000")
 public class DonationController {
 
     private final DonationsService donationsService;

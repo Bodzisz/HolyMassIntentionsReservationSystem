@@ -1,8 +1,10 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
+import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
 import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.entity.User;
+import io.github.bodzisz.hmirs.repository.ChurchRepository;
 import io.github.bodzisz.hmirs.repository.HolyMassRepository;
 import io.github.bodzisz.hmirs.repository.IntentionRepository;
 import io.github.bodzisz.hmirs.repository.UserRepository;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,18 +23,29 @@ public class IntentionServiceImpl implements IntentionService {
     private final IntentionRepository intentionRepository;
     private final UserRepository userRepository;
     private final HolyMassRepository holyMassRepository;
+    private final ChurchRepository churchRepository;
 
     public IntentionServiceImpl(IntentionRepository intentionRepository,
                                 UserRepository userRepository,
-                                HolyMassRepository holyMassRepository){
+                                HolyMassRepository holyMassRepository,
+                                ChurchRepository churchRepository){
         this.intentionRepository = intentionRepository;
         this.holyMassRepository = holyMassRepository;
         this.userRepository = userRepository;
+        this.churchRepository = churchRepository;
     }
 
     @Override
     public List<Intention> getIntentions() {
         return intentionRepository.findAll();
+    }
+
+    @Override
+    public List<Intention> getIntentionsByChurchByDay(final int churchId, final LocalDate day) {
+        Optional<Church> church = churchRepository.findById(churchId);
+        if (church.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid church");
+        List<HolyMass> holyMasses = holyMassRepository.findHolyMassesByChurchAndDate(church.get(), day);
+        return intentionRepository.findIntentionsByHolyMassIn(holyMasses);
     }
 
     @Override
