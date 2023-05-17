@@ -3,6 +3,7 @@ import Footer from "./components/Footer";
 import { useState } from "react";
 import NothingFound from "./components/NothingFound";
 import Navigation from "./components/Navigation";
+import ChurchList from "./components/ChurchList";
 
 function App() {
   const [activePage, setActivePage] = useState(1);
@@ -14,7 +15,9 @@ function App() {
   const getContent = () => {
     switch (activePage) {
       case 1:
-        return <HomePage />;
+        return <HomePage setActivePage={setActivePage} />;
+      case 2:
+        return <ChurchList />;
       default:
         return <NothingFound goToHomePage={changeViewToMainPage} />;
     }

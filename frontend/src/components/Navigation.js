@@ -90,7 +90,7 @@ const contentPages = [
   },
   {
     id: 2,
-    title: "Intencje",
+    title: "Kościoły",
   },
   {
     id: 3,
