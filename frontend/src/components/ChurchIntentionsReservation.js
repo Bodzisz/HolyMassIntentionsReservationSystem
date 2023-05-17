@@ -52,7 +52,6 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
   const [currentIntentions, setCurrentIntentions] = useState(null);
   const [intentionsLoading, setIntentionsLoading] = useState(false);
   const [intentionsError, setIntentionsError] = useState(false);
-  const [rereneder, setRerender] = useState(false);
 
   useEffect(() => {
     setHolyMassesLoading(true);
@@ -89,6 +88,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
         }
       })
       .then((data) => {
+        console.log(data);
         setIntentions(data);
         setIntentionsError(false);
       })
@@ -98,7 +98,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
       .finally(() => {
         setIntentionsLoading(false);
       });
-  }, [rereneder, church.id]);
+  }, [church.id]);
 
   const onDateChanged = (val) => {
     const formattedDate = formatDate(val);
@@ -109,7 +109,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
       );
       setCurrentIntentions(
         intentions.filter((intention) =>
-          filtred.map((mass) => mass.id).includes(intention.holyMass)
+          filtred.map((mass) => mass.id).includes(intention.holyMass.id)
         )
       );
       setCurrentMasses(filtred);
@@ -153,7 +153,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentMasses &&
+                    {currentMasses !== null &&
                       currentMasses.map((mass) => (
                         <tr key={mass.id}>
                           <td>{mass.startTime}</td>
@@ -207,7 +207,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                 <tr key={intention.id}>
                   <td>
                     {currentMasses
-                      ? findMassWithId(intention.holyMass).startTime
+                      ? findMassWithId(intention.holyMass.id).startTime
                       : ""}
                   </td>
                   <td>{intention.content}</td>
@@ -234,7 +234,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
         <>
           {isIntentionSavingError && (
             <div style={{ paddingBottom: "20px" }}>
-              <Alert title="Internal Server Error" color="red">
+              <Alert title="Błąd" color="red">
                 Wystąpił błąd podczas zapisywania intencji. Spróbuj ponownie
               </Alert>
             </div>
@@ -255,31 +255,59 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
 
           <Button
             onClick={() => {
+              const body = {
+                content: intentionContent,
+                holyMassId: selectedMass.id,
+                userId: 1,
+                isPaid: false,
+              };
+              console.log(body);
               setIsIntentionSaved(true);
               fetch(config.apiBaseUrl + "intentions", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: {
-                  content: intentionContent,
-                  isPaid: false,
-                  holyMass: selectedMass.id,
-                  user: 1,
-                },
+                body: JSON.stringify(body),
               })
                 .then((response) => {
                   if (response.status >= 200 && response.status < 300)
                     return response.json();
                   else {
+                    response.text().then((text) => {
+                      console.log(text);
+                    });
                     throw Error(response.status);
                   }
                 })
                 .then((data) => {
-                  console.log(data);
-                  console.log("SUCCESS");
+                  setSelectedMass({
+                    ...selectedMass,
+                    availableIntentions: selectedMass.availableIntentions - 1,
+                  });
+                  setHolyMasses(
+                    holyMasses.map((mass) =>
+                      mass.id === selectedMass.id
+                        ? {
+                            ...mass,
+                            availableIntentions: mass.availableIntentions - 1,
+                          }
+                        : mass
+                    )
+                  );
+                  setCurrentMasses(
+                    currentMasses.map((mass) =>
+                      mass.id === selectedMass.id
+                        ? {
+                            ...mass,
+                            availableIntentions: mass.availableIntentions - 1,
+                          }
+                        : mass
+                    )
+                  );
                   setSelectedMass(null);
-                  setRerender(!rereneder);
+                  setIntentions([data, ...intentions]);
+                  setCurrentIntentions([data, ...currentIntentions]);
                 })
                 .catch((error) => {
                   setIsIntentionSavingError(true);
