@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/churches")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ChurchController {
 
     private final ChurchService churchService;
@@ -56,6 +57,11 @@ public class ChurchController {
         churchCheck(updatedChurch);
         churchService.updateChurch(id, updatedChurch);
         return ResponseEntity.status(204).build();
+    }
+
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getCities(){
+        return ResponseEntity.ok(churchService.getCities());
     }
 
     private void churchCheck(Church church){

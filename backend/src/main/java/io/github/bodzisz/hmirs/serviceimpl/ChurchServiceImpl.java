@@ -11,8 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ChurchServiceImpl implements ChurchService {
@@ -90,5 +89,15 @@ public class ChurchServiceImpl implements ChurchService {
     @Override
     public List<Church> getChurchesByCity(final String city){
         return churchRepository.findChurchesByCity(city);
+    }
+
+    @Override
+    public List<String> getCities(){
+        Set<String> uniqueCities = new HashSet<>();
+        for(Church church : getChurches())
+            uniqueCities.add(church.getCity());
+        List<String> result = uniqueCities.stream().toList();
+        Collections.sort(result);
+        return result;
     }
 }

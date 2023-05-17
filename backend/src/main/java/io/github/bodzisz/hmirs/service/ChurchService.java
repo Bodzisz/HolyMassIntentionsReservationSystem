@@ -20,4 +20,6 @@ public interface ChurchService {
     Church deleteChurch(final int id);
 
     void updateChurch(final int id, final Church church);
+
+    List<String> getCities();
 }
