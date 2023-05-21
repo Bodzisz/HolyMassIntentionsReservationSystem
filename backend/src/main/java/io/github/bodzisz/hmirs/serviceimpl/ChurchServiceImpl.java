@@ -2,9 +2,11 @@ package io.github.bodzisz.hmirs.serviceimpl;
 
 import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
+import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.entity.Parish;
 import io.github.bodzisz.hmirs.repository.ChurchRepository;
 import io.github.bodzisz.hmirs.repository.HolyMassRepository;
+import io.github.bodzisz.hmirs.repository.IntentionRepository;
 import io.github.bodzisz.hmirs.repository.ParishRepository;
 import io.github.bodzisz.hmirs.service.ChurchService;
 import org.springframework.http.HttpStatus;
@@ -19,13 +21,15 @@ public class ChurchServiceImpl implements ChurchService {
     private final ChurchRepository churchRepository;
     private final HolyMassRepository holyMassRepository;
     private final ParishRepository parishRepository;
+    private final IntentionRepository intentionRepository;
 
     public ChurchServiceImpl(ChurchRepository churchRepository,
                              HolyMassRepository holyMassRepository,
-                             ParishRepository parishRepository){
+                             ParishRepository parishRepository, IntentionRepository intentionRepository){
         this.churchRepository = churchRepository;
         this.holyMassRepository = holyMassRepository;
         this.parishRepository = parishRepository;
+        this.intentionRepository = intentionRepository;
     }
 
     @Override
@@ -89,6 +93,11 @@ public class ChurchServiceImpl implements ChurchService {
     @Override
     public List<Church> getChurchesByCity(final String city){
         return churchRepository.findChurchesByCity(city);
+    }
+
+    @Override
+    public List<Intention> getChurchIntentions(int id) {
+        return intentionRepository.getIntentionByHolyMass_Church(getChurch(id));
     }
 
     @Override

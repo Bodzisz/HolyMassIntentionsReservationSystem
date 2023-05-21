@@ -2,6 +2,7 @@ package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
+import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.service.ChurchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,11 @@ public class ChurchController {
     @GetMapping("/{id}/holymasses")
     public ResponseEntity<List<HolyMass>> getHolyMassByChurch(@PathVariable final int id) {
         return ResponseEntity.ok(churchService.getHolyMasses(id));
+    }
+
+    @GetMapping("/{id}/intentions")
+    public ResponseEntity<List<Intention>> getChurchIntentions(@PathVariable final int id) {
+        return ResponseEntity.ok(churchService.getChurchIntentions(id));
     }
 
     @PostMapping

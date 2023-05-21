@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.controller;
 
+import io.github.bodzisz.hmirs.dto.NewIntentionDTO;
 import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.service.IntentionService;
 import org.springframework.http.HttpStatus;
@@ -49,8 +50,7 @@ public class IntentionController {
     }
 
     @PostMapping
-    public ResponseEntity<Intention> postIntention(@RequestBody final Intention intention) {
-        intentionCheck(intention);
+    public ResponseEntity<Intention> postIntention(@RequestBody final NewIntentionDTO intention) {
         return ResponseEntity.ok(intentionService.addIntention(intention));
     }
 

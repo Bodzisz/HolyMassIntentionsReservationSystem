@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.service;
 
+import io.github.bodzisz.hmirs.dto.NewIntentionDTO;
 import io.github.bodzisz.hmirs.entity.Intention;
 
 import java.time.LocalDate;
@@ -12,7 +13,7 @@ public interface IntentionService {
     
     Intention getIntention(final int id);
     
-    Intention addIntention(final Intention intention);
+    Intention addIntention(final NewIntentionDTO intention);
     
     Intention deleteIntention(final int id);
     

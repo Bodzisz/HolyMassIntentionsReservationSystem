@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
+import io.github.bodzisz.hmirs.dto.NewIntentionDTO;
 import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
 import io.github.bodzisz.hmirs.entity.Intention;
@@ -9,6 +10,7 @@ import io.github.bodzisz.hmirs.repository.HolyMassRepository;
 import io.github.bodzisz.hmirs.repository.IntentionRepository;
 import io.github.bodzisz.hmirs.repository.UserRepository;
 import io.github.bodzisz.hmirs.service.IntentionService;
+import org.apache.tomcat.websocket.pojo.PojoMessageHandlerWholeText;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -57,18 +59,25 @@ public class IntentionServiceImpl implements IntentionService {
     }
 
     @Override
-    public Intention addIntention(Intention intention) {
-        int userId = intention.getUser().getId();
+    public Intention addIntention(NewIntentionDTO intention) {
+        int userId = intention.userId();
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("User of id=%d was not found", userId));
-        int holyMassId = intention.getHolyMass().getId();
-        Optional<HolyMass> holyMass = holyMassRepository.findById(holyMassId);
-        if (holyMass.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        int holyMassId = intention.holyMassId();
+        Optional<HolyMass> holyMassOptional = holyMassRepository.findById(holyMassId);
+        if (holyMassOptional.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Holy Mass of id=%d was not found", holyMassId));
-        intention.setUser(user.get());
-        intention.setHolyMass(holyMass.get());
-        return intentionRepository.save(intention);
+        final HolyMass holyMass = holyMassOptional.get();
+        holyMass.setAvailableIntentions(holyMass.getAvailableIntentions() - 1);
+
+        Intention newIntention = new Intention();
+        newIntention.setId(0);
+        newIntention.setUser(user.get());
+        newIntention.setHolyMass(holyMass);
+        newIntention.setContent(intention.content());
+        newIntention.setPaid(intention.isPaid());
+        return intentionRepository.save(newIntention);
     }
 
     @Override
