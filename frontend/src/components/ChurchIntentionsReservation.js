@@ -14,8 +14,10 @@ import {
   Loader,
   Center,
   Alert,
+  Indicator,
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
+import dayjs from "dayjs";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -44,6 +46,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
   const [holyMassesLoading, setHolyMassesLoading] = useState(false);
   const [holyMassesError, setHolyMassesError] = useState(false);
   const [currentMasses, setCurrentMasses] = useState(null);
+  const [futureMasses, setFutureMasses] = useState(null);
   const [selectedMass, setSelectedMass] = useState(null);
   const [isIntentionSaved, setIsIntentionSaved] = useState(false);
   const [isIntentionSavingError, setIsIntentionSavingError] = useState(false);
@@ -67,6 +70,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
       })
       .then((data) => {
         setHolyMasses(data);
+        setFutureMasses(data.filter((mass) => dayjs().isBefore(mass.date)));
         setHolyMassesError(false);
       })
       .catch((error) => {
@@ -117,6 +121,36 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
     setSelectedDate(val);
   };
 
+  const renderDay = (date) => {
+    const day = date.getDate();
+    return (
+      <Indicator
+        size={6}
+        color="green"
+        offset={-5}
+        disabled={isDateDisabled(date)}
+      >
+        <div>{day}</div>
+      </Indicator>
+    );
+  };
+
+  const isDateDisabled = (date) => {
+    if (holyMasses !== undefined && holyMasses !== null) {
+      if (!dayjs().isAfter(date)) {
+        for (let i = 0; i < futureMasses.length; i++) {
+          if (
+            formatDate(date) === futureMasses[i].date &&
+            futureMasses[i].availableIntentions > 0
+          ) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
+
   const getContent = () => {
     if (holyMassesLoading || intentionsLoading)
       return (
@@ -139,7 +173,11 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                 <Title order={1}>Kościół {church.name}</Title>
                 <Title order={3}>{church.city}</Title>
               </div>
-              <DatePicker value={selectedDate} onChange={onDateChanged} />
+              <DatePicker
+                value={selectedDate}
+                onChange={onDateChanged}
+                renderDay={renderDay}
+              />
             </div>
             <div>
               <div style={{ paddingBottom: "30px" }}>
@@ -159,11 +197,12 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                           <td>{mass.startTime}</td>
                           <td>{mass.availableIntentions}</td>
                           <td>
-                            {mass.availableIntentions > 0 && (
-                              <Button onClick={() => setSelectedMass(mass)}>
-                                Zarezerwuj
-                              </Button>
-                            )}
+                            {mass.availableIntentions > 0 &&
+                              !dayjs().isAfter(mass.date) && (
+                                <Button onClick={() => setSelectedMass(mass)}>
+                                  Zarezerwuj
+                                </Button>
+                              )}
                           </td>
                         </tr>
                       ))}
