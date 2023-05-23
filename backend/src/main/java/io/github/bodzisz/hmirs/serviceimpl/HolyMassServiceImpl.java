@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
+import io.github.bodzisz.hmirs.dto.NewHolyMassDTO;
 import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
 import io.github.bodzisz.hmirs.repository.ChurchRepository;
@@ -37,13 +38,17 @@ public class HolyMassServiceImpl implements HolyMassService {
     }
 
     @Override
-    public HolyMass addHolyMass(HolyMass holyMass) {
-        int churchId = holyMass.getChurch().getId();
-        Optional<Church> church = churchRepository.findById(churchId);
+    public HolyMass addHolyMass(final NewHolyMassDTO holyMass) {
+        Optional<Church> church = churchRepository.findById(holyMass.churchId());
         if (church.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("Church of id=%d was not found", churchId));
-        holyMass.setChurch(church.get());
-        return holyMassRepository.save(holyMass);
+                String.format("Church of id=%d was not found", holyMass.churchId()));
+        HolyMass newHolyMass = new HolyMass();
+        newHolyMass.setId(0);
+        newHolyMass.setChurch(church.get());
+        newHolyMass.setDate(holyMass.date());
+        newHolyMass.setStartTime(holyMass.startTime());
+        newHolyMass.setAvailableIntentions(holyMass.availableIntentions());
+        return holyMassRepository.save(newHolyMass);
     }
 
     @Override
@@ -56,18 +61,18 @@ public class HolyMassServiceImpl implements HolyMassService {
     }
 
     @Override
-    public void updateHolyMass(final int id, final HolyMass holyMass) {
+    public void updateHolyMass(final int id, final NewHolyMassDTO holyMass) {
         HolyMass existingHolyMass = holyMassRepository.findById(id).orElse(null);
         if (existingHolyMass != null) {
-            int churchId = holyMass.getChurch().getId();
+            int churchId = holyMass.churchId();
             Optional<Church> church = churchRepository.findById(churchId);
             if (church.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Church of id=%d was not found", churchId));
             existingHolyMass.setChurch(church.get());
-            existingHolyMass.setDate(holyMass.getDate());
-            existingHolyMass.setStartTime(holyMass.getStartTime());
-            existingHolyMass.setChurch(holyMass.getChurch());
-            existingHolyMass.setAvailableIntentions(holyMass.getAvailableIntentions());
+            existingHolyMass.setDate(holyMass.date());
+            existingHolyMass.setStartTime(holyMass.startTime());
+            existingHolyMass.setChurch(church.get());
+            existingHolyMass.setAvailableIntentions(holyMass.availableIntentions());
             holyMassRepository.save(existingHolyMass);
         }
         else{
