@@ -18,6 +18,7 @@ import {
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import dayjs from "dayjs";
+import { formatDate } from "../util/dateFormatter";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -27,10 +28,6 @@ const useStyles = createStyles((theme) => ({
     paddingBottom: rem(50),
   },
 }));
-
-const formatDate = (date) => {
-  return `${date.getFullYear()}-0${date.getMonth() + 1}-${date.getDate()}`;
-};
 
 const DEFAULT_HEADERS = {
   method: "GET",

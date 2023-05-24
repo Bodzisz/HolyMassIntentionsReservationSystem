@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.controller;
 
+import io.github.bodzisz.hmirs.dto.NewHolyMassDTO;
 import io.github.bodzisz.hmirs.entity.HolyMass;
 import io.github.bodzisz.hmirs.service.HolyMassService;
 import org.springframework.http.HttpStatus;
@@ -31,8 +32,7 @@ public class HolyMassController {
     }
 
     @PostMapping
-    public ResponseEntity<HolyMass> postHolyMass(@RequestBody final HolyMass hmass) {
-        holyMassCheck(hmass);
+    public ResponseEntity<HolyMass> postHolyMass(@RequestBody final NewHolyMassDTO hmass) {
         return ResponseEntity.ok(holyMassService.addHolyMass(hmass));
     }
 
@@ -43,21 +43,9 @@ public class HolyMassController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateUser(@PathVariable int id, @RequestBody HolyMass updatedHolyMass) {
-        holyMassCheck(updatedHolyMass);
+    public ResponseEntity<Void> updateHolyMass(@PathVariable int id, @RequestBody NewHolyMassDTO updatedHolyMass) {
         holyMassService.updateHolyMass(id, updatedHolyMass);
         return ResponseEntity.status(204).build();
-    }
-
-    private void holyMassCheck(HolyMass holyMass){
-        if (holyMass.getDate() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date");
-        if (holyMass.getStartTime() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid start hour");
-        if (holyMass.getChurch() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid church");
-        if (holyMass.getAvailableIntentions() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid intention amount");
     }
 
 }
