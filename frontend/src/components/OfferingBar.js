@@ -22,12 +22,6 @@ const useStyles = createStyles((theme) => ({
     zIndex: 1,
   },
 
-  slider: {
-    position: 'absolute',
-    width: '100%',
-    bottom: rem(-1),
-  },
-
   thumb: {
     width: rem(16),
     height: rem(16),
@@ -40,29 +34,19 @@ const useStyles = createStyles((theme) => ({
 
 export function SliderInput(props) {
   const { classes } = useStyles();
-  const [value, setValue] = useState(2200);
+  const [value, setValue] = useState(50);
   return (
     <div className={classes.wrapper}>
       <NumberInput
         value={value}
         onChange={setValue}
-        label="Twoja wysokość ofiary"
-        step={50}
+        label="Wysokość datku"
+        placeholder="Twoja wysokość datku"
+        defaultValue={50}
+        step={10}
         min={props.minimalOffering}
         max={10434}
-        hideControls
         classNames={{ input: classes.input, label: classes.label }}
-      />
-      <Slider
-        max={10434}
-        min={props.minimalOffering}
-        label={null}
-        value={value === '' ? 0 : value}
-        onChange={setValue}
-        size={2}
-        radius={0}
-        className={classes.slider}
-        classNames={{ thumb: classes.thumb, track: classes.track }}
       />
     </div>
   );

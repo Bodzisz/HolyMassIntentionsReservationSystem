@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Title, Accordion, createStyles, rem, Button, Group, } from '@mantine/core';
+import { Container, Title, Center, Select, createStyles, rem, Button, Group, } from '@mantine/core';
 import { ProgressCardColored } from './Progress';
-import { SliderInput } from './OfferingBar';
+import { SliderInput } from './OfferingBar';  
 
 const useStyles = createStyles((theme) => ({
     wrapper: {
       paddingTop: `calc(${theme.spacing.xl} * 2)`,
-      paddingBottom: `calc(${theme.spacing.xl} * 2)`,
+      paddingBottom: `calc(${theme.spacing.xl})`,
       minHeight: 650,
     },
   
@@ -30,6 +30,15 @@ const OfferingPage = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedChurch, setSelectedChurch] = useState('');
   const [expandedItem, setExpandedItem] = useState('city');
+  const [selectPadding, setSelectPadding] = useState(rem(470));
+  
+  useEffect(() => {
+    if (selectedCity === null) {
+      setSelectPadding(rem(470));
+    } else {
+      setSelectPadding(rem(0));
+    }
+  }, [selectedChurch]);
 
   // Function to handle donation submission
   const handleDonationSubmit = (e) => {
@@ -78,42 +87,43 @@ const OfferingPage = () => {
           Wirtualna Taca
         </Title>
   
-        <Accordion variant="separated">
-          <Accordion.Item className={classes.item} value="city">
-            <Accordion.Control>Wybierz miasto parafii</Accordion.Control>
-            <Accordion.Panel>Podaj miasto parafii, aby filtrować dostępne wyniki:<br></br>
-                <select id="city-select" value={selectedCity} onChange={handleCityChange}>
-                <option value="">-- Wybierz --</option>
-                {uniqueCities.map((city) => (
-                <option value={city}>
-                    {city}
-                </option>
-                ))}
-        </select>
-            </Accordion.Panel>
-          </Accordion.Item>
-  
-          <Accordion.Item className={classes.item} value="church">
-            <Accordion.Control>Wybierz parafię</Accordion.Control>
-            <Accordion.Panel>
-                Wybierz parafię, którą chcesz wspomóc datkiem:<br></br>        
-                <select id="church-select" value={selectedChurch} onChange={handleChurchChange}>
-                <option value="">-- Wybierz --</option>
-                {churches.filter((church) => church.city===selectedCity || selectedCity==='').map((church) => (
-                <option key={church.id} value={church.name}>
-                    {church.name}
-                </option>
-                ))}
-                </select>
-            </Accordion.Panel>
-          </Accordion.Item>
-  
-          <Accordion.Item className={classes.item} value="donation">
-            <Accordion.Control>Określ wysokość ofiary</Accordion.Control>
-            <Accordion.Panel>
+        <Container style={{ paddingBottom: selectPadding }}>
+            <Center style={{ paddingBottom: "30px" }}>
+              <Select
+                label="Wybierz miasto"
+                placeholder="Kliknij aby wybrać miasto"
+                data={uniqueCities}
+                value={selectedCity}
+                onChange={(value) => {
+                  setSelectedCity(value);
+                  setSelectedChurch(null);
+                }}
+                mx="auto"
+                style={{ width: "400px" }}
+              />
+            </Center>
+          </Container>
+
+          <Container style={{ paddingBottom: selectPadding }}>
+            <Center style={{ paddingBottom: "30px" }}>
+              <Select
+                label="Wybierz kościół"
+                placeholder="Kliknij aby wybrać kościół"
+                data={churches.filter((church) => church.city===selectedCity || selectedCity==='').map((church) => ({
+                  value: church.id.toString(),
+                  label: church.name + " w " + church.city,
+                }))}
+                value={selectedChurch}
+                onChange={(value) => setSelectedChurch(value)}
+                mx="auto"
+                style={{ width: "400px" }}
+              />
+            </Center>
+          </Container>
+
                 <div class="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
-                <div class="accordion"><SliderInput minimalOffering={2}></SliderInput></div>
-                <div class="accordion"><ProgressCardColored current={1027} goal={3000} name="Chodnik na plebanii"></ProgressCardColored></div>
+                <div class="accordion" ><SliderInput minimalOffering={2}></SliderInput></div>
+                <div class="progress" ><ProgressCardColored current={1027} goal={3000} name="Chodnik na plebanii"></ProgressCardColored></div>
                 <div class="accordion">
                     <Group className={classes.controls}>
                         <Button
@@ -127,9 +137,6 @@ const OfferingPage = () => {
                         </Button>
                     </Group>
                 </div>
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
       </Container>
     </div>
   );

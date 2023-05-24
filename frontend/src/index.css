@@ -15,6 +15,16 @@ code {
 
 div.accordion {
   padding: 10px;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+
+div.progress{
+  width:80%;
+  display:inline;
+  align-items: center;
+  justify-content: center;
 }
 
 .mantine-16xumhx{
