@@ -66,8 +66,10 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
         }
       })
       .then((data) => {
+        console.log(data);
         setHolyMasses(data);
         setFutureMasses(data.filter((mass) => dayjs().isBefore(mass.date)));
+        console.log(futureMasses);
         setHolyMassesError(false);
       })
       .catch((error) => {
@@ -99,6 +101,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
       .finally(() => {
         setIntentionsLoading(false);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [church.id]);
 
   const onDateChanged = (val) => {
@@ -310,9 +313,6 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                   if (response.status >= 200 && response.status < 300)
                     return response.json();
                   else {
-                    response.text().then((text) => {
-                      console.log(text);
-                    });
                     throw Error(response.status);
                   }
                 })
