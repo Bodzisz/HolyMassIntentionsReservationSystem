@@ -11,11 +11,11 @@ import {
   Modal,
 } from "@mantine/core";
 import { TimeInput, DatePicker, YearPicker } from "@mantine/dates";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useFetch from "../api/useFetch";
 import { formatDate } from "../util/dateFormatter";
+import { config } from "../config/config";
 
-/* eslint-disable */
 function PriestPanel() {
   const { data: churches, loading, error } = useFetch("churches");
   const [selectedChurch, setSelectedChurch] = useState(null);
@@ -26,6 +26,15 @@ function PriestPanel() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isModalOpened, setModalOpened] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [selectPadding, setSelectPadding] = useState(rem(470));
+
+  useEffect(() => {
+    if (selectedChurch === null) {
+      setSelectPadding(rem(470));
+    } else {
+      setSelectPadding(rem(0));
+    }
+  }, [selectedChurch]);
 
   const dateOptions = [
     { value: "1", label: "Jeden dzień" },
@@ -33,43 +42,33 @@ function PriestPanel() {
     { value: "3", label: "Niedziele w roku" },
   ];
 
-  const onClickAddMass = () => {
-    console.log("1");
-    if (selectedDateOption === "1" && massStartTimeRef.current.value !== "") {
-      console.log("2");
-      if (selectedChurch !== null) {
-        console.log("IN");
-        const body = {
-          date: formatDate(selectedDate),
-          startTime: massStartTimeRef.current.value + ":00",
-          availableIntentions: availableIntentions,
-          churchId: Number(selectedChurch),
-        };
-        console.log(body);
-        fetch("http://localhost:8080/holymasses", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
+  const onClickAddMass = (url, body) => {
+    if (massStartTimeRef.current.value !== "" && selectedChurch !== null) {
+      console.log(body);
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((response) => {
+          if (response.status >= 200 && response.status < 300)
+            return response.json();
+          else {
+            throw Error(response.status);
+          }
         })
-          .then((response) => {
-            if (response.status >= 200 && response.status < 300)
-              return response.json();
-            else {
-              throw Error(response.status);
-            }
-          })
-          .then(() => {
-            setIsSaved(true);
-          })
-          .catch((error) => {
-            setIsSaved(false);
-          })
-          .finally(() => {
-            setModalOpened(true);
-          });
-      }
+        .then((data) => {
+          console.log(data);
+          setIsSaved(true);
+        })
+        .catch(() => {
+          setIsSaved(false);
+        })
+        .finally(() => {
+          setModalOpened(true);
+        });
     }
   };
 
@@ -89,7 +88,7 @@ function PriestPanel() {
     else
       return (
         <>
-          <Container>
+          <Container style={{ paddingBottom: selectPadding }}>
             <Center style={{ paddingBottom: "30px" }}>
               <Select
                 label="Wybierz kościół"
@@ -114,7 +113,6 @@ function PriestPanel() {
                 <TimeInput
                   label="Wpisz godzinę rozpoczęcia mszy"
                   ref={massStartTimeRef}
-                  withIcon
                   maw={400}
                   mx="auto"
                   required
@@ -134,7 +132,7 @@ function PriestPanel() {
                 <Center>
                   <h3>Wybierz datę</h3>
                 </Center>
-                {/* <Center>
+                <Center>
                   <Select
                     data={dateOptions}
                     defaultValue={selectedDateOption}
@@ -142,13 +140,39 @@ function PriestPanel() {
                     onChange={(value) => setSelectedDateOption(value)}
                     style={{ paddingBottom: "30px" }}
                   />
-                </Center> */}
+                </Center>
 
                 <Center>{getContentForDateOption()}</Center>
               </Container>
 
-              <Group position="right" onClick={() => onClickAddMass()}>
-                <Button>Dodaj</Button>
+              <Group position="right">
+                <Button
+                  onClick={() => {
+                    if (selectedDateOption === "1") {
+                      onClickAddMass(config.apiBaseUrl + "holymasses", {
+                        date: formatDate(selectedDate),
+                        startTime: massStartTimeRef.current.value + ":00",
+                        availableIntentions: availableIntentions,
+                        churchId: Number(selectedChurch),
+                      });
+                    } else {
+                      onClickAddMass(
+                        `${
+                          config.apiBaseUrl
+                        }holymasses/addForYear/${selectedYear.getFullYear()}?forSundays=${
+                          selectedDateOption === "3"
+                        }`,
+                        {
+                          startTime: massStartTimeRef.current.value + ":00",
+                          availableIntentions: availableIntentions,
+                          churchId: Number(selectedChurch),
+                        }
+                      );
+                    }
+                  }}
+                >
+                  Dodaj
+                </Button>
               </Group>
             </Container>
           )}
@@ -172,12 +196,14 @@ function PriestPanel() {
             Wybierz rok (w obecnym roku wypełnione zostaną tylko dni w
             przyszłości)
           </Text>
-          <YearPicker
-            value={selectedYear}
-            onChange={(year) => setSelectedYear(year)}
-            defaultValue={selectedYear}
-            minDate={new Date()}
-          />
+          <Center>
+            <YearPicker
+              value={selectedYear}
+              onChange={(year) => setSelectedYear(year)}
+              defaultValue={selectedYear}
+              minDate={new Date()}
+            />
+          </Center>
         </Container>
       );
     }
