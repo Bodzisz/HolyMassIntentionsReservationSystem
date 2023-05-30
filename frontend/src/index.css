@@ -11,3 +11,26 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+div.accordion {
+  padding: 10px;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+
+div.progress{
+  width:80%;
+  display:inline;
+  align-items: center;
+  justify-content: center;
+}
+
+.mantine-16xumhx{
+  max-width: 70%;
+}
+
+.mantine-k3ov3c{
+  justify-content: center;
+}

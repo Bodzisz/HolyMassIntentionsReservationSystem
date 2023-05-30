@@ -1,4 +1,5 @@
 import HomePage from "./components/HomePage";
+import OfferingPage from "./components/OfferingPage";
 import Footer from "./components/Footer";
 import { useState } from "react";
 import NothingFound from "./components/NothingFound";
@@ -19,6 +20,8 @@ function App() {
         return <HomePage setActivePage={setActivePage} />;
       case 2:
         return <ChurchList />;
+      case 3:
+        return <OfferingPage />;
       case 4:
         return <PriestPanel />;
       default:
