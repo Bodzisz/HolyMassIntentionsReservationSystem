@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createStyles, NumberInput, Slider, rem } from '@mantine/core';
+import { createStyles, NumberInput, rem } from '@mantine/core';
 
 const useStyles = createStyles((theme) => ({
   wrapper: {

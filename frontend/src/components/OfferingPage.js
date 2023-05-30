@@ -29,7 +29,6 @@ const OfferingPage = () => {
   const [uniqueCities, setUniqueCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedChurch, setSelectedChurch] = useState('');
-  const [expandedItem, setExpandedItem] = useState('city');
   const [selectPadding, setSelectPadding] = useState(rem(470));
   
   useEffect(() => {
@@ -65,18 +64,6 @@ const OfferingPage = () => {
         })
       .catch((error) => console.error(error));
   }, []);
-
-  // Handle the church selection change
-  const handleChurchChange = (event) => {
-    setSelectedChurch(event.target.value);
-  };
-
-  const handleCityChange = (event) => {
-    const selectedCityValue = event.target.value;
-    setSelectedCity(selectedCityValue);
-    setSelectedChurch('');
-    console.log(selectedCityValue);
-  };
 
   const { classes } = useStyles();
 
