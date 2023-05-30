@@ -1,5 +1,7 @@
 package io.github.bodzisz.hmirs.controller;
 
+import io.github.bodzisz.hmirs.dto.NewHolyMassDTO;
+import io.github.bodzisz.hmirs.dto.NewHolyMassForYearDTO;
 import io.github.bodzisz.hmirs.entity.HolyMass;
 import io.github.bodzisz.hmirs.service.HolyMassService;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/holymasses")
+@CrossOrigin(origins = "http://localhost:3000")
 public class HolyMassController {
 
     private final HolyMassService holyMassService;
@@ -30,9 +33,15 @@ public class HolyMassController {
     }
 
     @PostMapping
-    public ResponseEntity<HolyMass> postHolyMass(@RequestBody final HolyMass hmass) {
-        holyMassCheck(hmass);
+    public ResponseEntity<HolyMass> postHolyMass(@RequestBody final NewHolyMassDTO hmass) {
         return ResponseEntity.ok(holyMassService.addHolyMass(hmass));
+    }
+
+    @PostMapping("/addForYear/{year}")
+    public ResponseEntity<List<HolyMass>> addHolyMassesForYear(@RequestBody final NewHolyMassForYearDTO hmass, @PathVariable("year") int year,
+                                                               @RequestParam(required = false, name = "forSundays") String forSundays) {
+        boolean forSundaysValue = Boolean.parseBoolean(forSundays);
+        return ResponseEntity.ok(holyMassService.addHolyMassesForYear(hmass, year, forSundaysValue));
     }
 
     @DeleteMapping("/{id}")
@@ -42,21 +51,9 @@ public class HolyMassController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateUser(@PathVariable int id, @RequestBody HolyMass updatedHolyMass) {
-        holyMassCheck(updatedHolyMass);
+    public ResponseEntity<Void> updateHolyMass(@PathVariable int id, @RequestBody NewHolyMassDTO updatedHolyMass) {
         holyMassService.updateHolyMass(id, updatedHolyMass);
         return ResponseEntity.status(204).build();
-    }
-
-    private void holyMassCheck(HolyMass holyMass){
-        if (holyMass.getDate() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date");
-        if (holyMass.getStartTime() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid start hour");
-        if (holyMass.getChurch() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid church");
-        if (holyMass.getAvailableIntentions() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid intention amount");
     }
 
 }

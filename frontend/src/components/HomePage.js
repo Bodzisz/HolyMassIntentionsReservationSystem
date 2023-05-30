@@ -17,7 +17,6 @@ const useStyles = createStyles((theme) => ({
 
   inner: {
     position: "relative",
-    paddingTop: rem(80),
     paddingBottom: rem(80),
 
     [theme.fn.smallerThan("sm")]: {

@@ -2,6 +2,7 @@ package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Church;
 import io.github.bodzisz.hmirs.entity.HolyMass;
+import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.service.ChurchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/churches")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ChurchController {
 
     private final ChurchService churchService;
@@ -40,6 +42,11 @@ public class ChurchController {
         return ResponseEntity.ok(churchService.getHolyMasses(id));
     }
 
+    @GetMapping("/{id}/intentions")
+    public ResponseEntity<List<Intention>> getChurchIntentions(@PathVariable final int id) {
+        return ResponseEntity.ok(churchService.getChurchIntentions(id));
+    }
+
     @PostMapping
     public ResponseEntity<Church> postChurch(@RequestBody final Church church) {
         churchCheck(church);
@@ -56,6 +63,11 @@ public class ChurchController {
         churchCheck(updatedChurch);
         churchService.updateChurch(id, updatedChurch);
         return ResponseEntity.status(204).build();
+    }
+
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getCities(){
+        return ResponseEntity.ok(churchService.getCities());
     }
 
     private void churchCheck(Church church){

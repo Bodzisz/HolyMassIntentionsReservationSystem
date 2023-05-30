@@ -98,6 +98,10 @@ const contentPages = [
   },
   {
     id: 4,
+    title: "Panel Księdza",
+  },
+  {
+    id: 5,
     title: "Kontakt",
   },
 ];

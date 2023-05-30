@@ -5,6 +5,7 @@ import { useState } from "react";
 import NothingFound from "./components/NothingFound";
 import Navigation from "./components/Navigation";
 import ChurchList from "./components/ChurchList";
+import PriestPanel from "./components/PriestPanel";
 
 function App() {
   const [activePage, setActivePage] = useState(1);
@@ -21,6 +22,8 @@ function App() {
         return <ChurchList />;
       case 3:
         return <OfferingPage />;
+      case 4:
+        return <PriestPanel />;
       default:
         return <NothingFound goToHomePage={changeViewToMainPage} />;
     }

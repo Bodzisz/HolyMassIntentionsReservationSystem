@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/parishes")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ParishController {
 
     private final ParishService parishService;

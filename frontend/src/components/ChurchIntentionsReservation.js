@@ -14,8 +14,11 @@ import {
   Loader,
   Center,
   Alert,
+  Indicator,
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
+import dayjs from "dayjs";
+import { formatDate } from "../util/dateFormatter";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -25,10 +28,6 @@ const useStyles = createStyles((theme) => ({
     paddingBottom: rem(50),
   },
 }));
-
-const formatDate = (date) => {
-  return `${date.getFullYear()}-0${date.getMonth() + 1}-${date.getDate()}`;
-};
 
 const DEFAULT_HEADERS = {
   method: "GET",
@@ -44,6 +43,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
   const [holyMassesLoading, setHolyMassesLoading] = useState(false);
   const [holyMassesError, setHolyMassesError] = useState(false);
   const [currentMasses, setCurrentMasses] = useState(null);
+  const [futureMasses, setFutureMasses] = useState(null);
   const [selectedMass, setSelectedMass] = useState(null);
   const [isIntentionSaved, setIsIntentionSaved] = useState(false);
   const [isIntentionSavingError, setIsIntentionSavingError] = useState(false);
@@ -52,7 +52,6 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
   const [currentIntentions, setCurrentIntentions] = useState(null);
   const [intentionsLoading, setIntentionsLoading] = useState(false);
   const [intentionsError, setIntentionsError] = useState(false);
-  const [rereneder, setRerender] = useState(false);
 
   useEffect(() => {
     setHolyMassesLoading(true);
@@ -67,7 +66,10 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
         }
       })
       .then((data) => {
+        console.log(data);
         setHolyMasses(data);
+        setFutureMasses(data.filter((mass) => dayjs().isBefore(mass.date)));
+        console.log(futureMasses);
         setHolyMassesError(false);
       })
       .catch((error) => {
@@ -89,6 +91,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
         }
       })
       .then((data) => {
+        console.log(data);
         setIntentions(data);
         setIntentionsError(false);
       })
@@ -98,7 +101,8 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
       .finally(() => {
         setIntentionsLoading(false);
       });
-  }, [rereneder, church.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [church.id]);
 
   const onDateChanged = (val) => {
     const formattedDate = formatDate(val);
@@ -109,12 +113,42 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
       );
       setCurrentIntentions(
         intentions.filter((intention) =>
-          filtred.map((mass) => mass.id).includes(intention.holyMass)
+          filtred.map((mass) => mass.id).includes(intention.holyMass.id)
         )
       );
       setCurrentMasses(filtred);
     }
     setSelectedDate(val);
+  };
+
+  const renderDay = (date) => {
+    const day = date.getDate();
+    return (
+      <Indicator
+        size={6}
+        color="green"
+        offset={-5}
+        disabled={isDateDisabled(date)}
+      >
+        <div>{day}</div>
+      </Indicator>
+    );
+  };
+
+  const isDateDisabled = (date) => {
+    if (holyMasses !== undefined && holyMasses !== null) {
+      if (!dayjs().isAfter(date)) {
+        for (let i = 0; i < futureMasses.length; i++) {
+          if (
+            formatDate(date) === futureMasses[i].date &&
+            futureMasses[i].availableIntentions > 0
+          ) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   };
 
   const getContent = () => {
@@ -139,7 +173,11 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                 <Title order={1}>Kościół {church.name}</Title>
                 <Title order={3}>{church.city}</Title>
               </div>
-              <DatePicker value={selectedDate} onChange={onDateChanged} />
+              <DatePicker
+                value={selectedDate}
+                onChange={onDateChanged}
+                renderDay={renderDay}
+              />
             </div>
             <div>
               <div style={{ paddingBottom: "30px" }}>
@@ -153,17 +191,18 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentMasses &&
+                    {currentMasses !== null &&
                       currentMasses.map((mass) => (
                         <tr key={mass.id}>
                           <td>{mass.startTime}</td>
                           <td>{mass.availableIntentions}</td>
                           <td>
-                            {mass.availableIntentions > 0 && (
-                              <Button onClick={() => setSelectedMass(mass)}>
-                                Zarezerwuj
-                              </Button>
-                            )}
+                            {mass.availableIntentions > 0 &&
+                              !dayjs().isAfter(mass.date) && (
+                                <Button onClick={() => setSelectedMass(mass)}>
+                                  Zarezerwuj
+                                </Button>
+                              )}
                           </td>
                         </tr>
                       ))}
@@ -207,7 +246,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                 <tr key={intention.id}>
                   <td>
                     {currentMasses
-                      ? findMassWithId(intention.holyMass).startTime
+                      ? findMassWithId(intention.holyMass.id).startTime
                       : ""}
                   </td>
                   <td>{intention.content}</td>
@@ -234,7 +273,7 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
         <>
           {isIntentionSavingError && (
             <div style={{ paddingBottom: "20px" }}>
-              <Alert title="Internal Server Error" color="red">
+              <Alert title="Błąd" color="red">
                 Wystąpił błąd podczas zapisywania intencji. Spróbuj ponownie
               </Alert>
             </div>
@@ -255,18 +294,20 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
 
           <Button
             onClick={() => {
+              const body = {
+                content: intentionContent,
+                holyMassId: selectedMass.id,
+                userId: 1,
+                isPaid: false,
+              };
+              console.log(body);
               setIsIntentionSaved(true);
               fetch(config.apiBaseUrl + "intentions", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
                 },
-                body: {
-                  content: intentionContent,
-                  isPaid: false,
-                  holyMass: selectedMass.id,
-                  user: 1,
-                },
+                body: JSON.stringify(body),
               })
                 .then((response) => {
                   if (response.status >= 200 && response.status < 300)
@@ -276,10 +317,33 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                   }
                 })
                 .then((data) => {
-                  console.log(data);
-                  console.log("SUCCESS");
+                  setSelectedMass({
+                    ...selectedMass,
+                    availableIntentions: selectedMass.availableIntentions - 1,
+                  });
+                  setHolyMasses(
+                    holyMasses.map((mass) =>
+                      mass.id === selectedMass.id
+                        ? {
+                            ...mass,
+                            availableIntentions: mass.availableIntentions - 1,
+                          }
+                        : mass
+                    )
+                  );
+                  setCurrentMasses(
+                    currentMasses.map((mass) =>
+                      mass.id === selectedMass.id
+                        ? {
+                            ...mass,
+                            availableIntentions: mass.availableIntentions - 1,
+                          }
+                        : mass
+                    )
+                  );
                   setSelectedMass(null);
-                  setRerender(!rereneder);
+                  setIntentions([data, ...intentions]);
+                  setCurrentIntentions([data, ...currentIntentions]);
                 })
                 .catch((error) => {
                   setIsIntentionSavingError(true);
