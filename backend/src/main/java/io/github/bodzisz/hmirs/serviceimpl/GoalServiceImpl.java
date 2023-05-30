@@ -46,6 +46,11 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
+    public Goal getGoalByParish(Parish parish){
+        return goalRepository.findGoalByParish(parish);
+    }
+
+    @Override
     public Goal addGoal(Goal goal) {
         int parishId = goal.getParish().getId();
         Optional<Parish> parish = parishRepository.findById(parishId);
@@ -65,7 +70,7 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public void updateGoal(final int id, Goal goal) {
+    public void updateGoal(final int id, final Goal goal) {
         Goal existingGoal = goalRepository.findById(id).orElse(null);
         if (existingGoal != null) {
             existingGoal.setAmount(goal.getAmount());
@@ -80,5 +85,11 @@ public class GoalServiceImpl implements GoalService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     String.format("Goal of id=%d was not found", id));
         }
+    }
+
+    @Override
+    public void addProgress(final Goal goal, final int amount) {
+        goal.setGathered(goal.getGathered() + amount);
+        goalRepository.save(goal);
     }
 }

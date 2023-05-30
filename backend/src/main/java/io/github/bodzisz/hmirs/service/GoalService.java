@@ -1,6 +1,7 @@
 package io.github.bodzisz.hmirs.service;
 
 import io.github.bodzisz.hmirs.entity.Goal;
+import io.github.bodzisz.hmirs.entity.Parish;
 
 import java.util.List;
 
@@ -16,5 +17,9 @@ public interface GoalService {
 
     void updateGoal(final int id, final Goal goal);
 
-    public Goal getGoalByParishId(int id);
+    void addProgress(final Goal goal, final int amount);
+
+    Goal getGoalByParishId(int id);
+
+    Goal getGoalByParish(Parish parish);
 }

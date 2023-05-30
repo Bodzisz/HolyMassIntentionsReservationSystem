@@ -2,6 +2,7 @@ package io.github.bodzisz.hmirs.controller;
 
 import io.github.bodzisz.hmirs.entity.Donation;
 import io.github.bodzisz.hmirs.service.DonationsService;
+import io.github.bodzisz.hmirs.service.GoalService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,10 @@ import java.util.List;
 public class DonationController {
 
     private final DonationsService donationsService;
+    private final GoalService goalService;
 
-    public DonationController(DonationsService donationsService) {
+    public DonationController(DonationsService donationsService, GoalService goalService) {
+        this.goalService = goalService;
         this.donationsService = donationsService;
     }
 
@@ -33,6 +36,7 @@ public class DonationController {
     @PostMapping
     public ResponseEntity<Donation> postDonation(@RequestBody final Donation donation) {
         donationCheck(donation);
+        goalService.addProgress(goalService.getGoalByParish(donation.getParish()),donation.getAmount());
         return ResponseEntity.ok(donationsService.addDonation(donation));
     }
 
