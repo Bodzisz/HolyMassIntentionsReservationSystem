@@ -8,13 +8,16 @@ import {
   NumberInput,
   Button,
   Text,
-  Modal,
+  Modal, 
+  Tabs,
 } from "@mantine/core";
 import { TimeInput, DatePicker, YearPicker } from "@mantine/dates";
 import { useEffect, useRef, useState } from "react";
 import useFetch from "../api/useFetch";
 import { formatDate } from "../util/dateFormatter";
 import { config } from "../config/config";
+import { ProgressCardColored } from "./Progress"
+import { SliderInput } from "./OfferingBar"
 
 function PriestPanel() {
   const { data: churches, loading, error } = useFetch("churches");
@@ -106,6 +109,15 @@ function PriestPanel() {
           </Container>
 
           {selectedChurch && (
+            <Tabs color="teal" defaultValue="first">
+            <Tabs.List>
+              <Tabs.Tab value="first">Zarządzanie mszami</Tabs.Tab>
+              <Tabs.Tab value="second" color="blue">
+                Zarządzanie celem zbiórki
+              </Tabs.Tab>
+            </Tabs.List>
+
+            <Tabs.Panel value="first" pt="xs">
             <Container>
               <h1>Dodaj mszę</h1>
 
@@ -175,6 +187,17 @@ function PriestPanel() {
                 </Button>
               </Group>
             </Container>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="second" pt="xs">
+              <Container>
+              <div class="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
+                <div class="accordion" ><SliderInput minimalOffering={2}></SliderInput></div>
+                <div class="progress" ><ProgressCardColored current={1027} goal={3000} name="Chodnik na plebanii"></ProgressCardColored></div>
+              </Container>
+            </Tabs.Panel>
+                  
+            </Tabs>
           )}
         </>
       );
