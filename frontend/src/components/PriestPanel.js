@@ -21,6 +21,8 @@ import { SliderInput } from "./OfferingBar"
 
 function PriestPanel() {
   const { data: churches, loading, error } = useFetch("churches");
+  const { data: goals, loadingGoals, errorGoals } = useFetch("goals");
+  const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedChurch, setSelectedChurch] = useState(null);
   const massStartTimeRef = useRef();
   const [availableIntentions, setAvailableIntentions] = useState(1);
@@ -76,19 +78,24 @@ function PriestPanel() {
   };
 
   const getContent = () => {
-    if (loading)
+    if (loading || loadingGoals)
       return (
         <div style={{ paddingBottom: rem(110), paddingTop: rem(200) }}>
           <Loader size="xl" />
         </div>
       );
-    else if (error !== null)
+    else if (error !== null && errorGoals !== null)
+    {
       return (
         <Center>
           <div>Something went wrong</div>
         </Center>
       );
-    else
+    }
+      
+    else{
+      console.log('c');
+      console.log(churches);
       return (
         <>
           <Container style={{ paddingBottom: selectPadding }}>
@@ -101,14 +108,25 @@ function PriestPanel() {
                   label: church.name + " w " + church.city,
                 }))}
                 value={selectedChurch}
-                onChange={(value) => setSelectedChurch(value)}
+                onChange={
+                  (value) => {
+                    setSelectedChurch(value);
+                    const res = goals.filter(
+                      (goal) => {
+                        return goal.parish.id === churches[selectedChurch].parish.id;
+                      }
+                    )
+                    const [desired] = res;
+                    setSelectedGoal(desired);
+                }
+                }
                 mx="auto"
                 style={{ width: "400px" }}
               />
             </Center>
           </Container>
 
-          {selectedChurch && (
+          {selectedChurch && selectedGoal && (
             <Tabs color="teal" defaultValue="first">
             <Tabs.List>
               <Tabs.Tab value="first">Zarządzanie mszami</Tabs.Tab>
@@ -193,7 +211,7 @@ function PriestPanel() {
               <Container>
               <div class="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
                 <div class="accordion" ><SliderInput minimalOffering={2}></SliderInput></div>
-                <div class="progress" ><ProgressCardColored current={1027} goal={3000} name="Chodnik na plebanii"></ProgressCardColored></div>
+                <div class="progress" ><ProgressCardColored current={selectedGoal.gathered} goal={selectedGoal.amount} name={selectedGoal.goal_title}></ProgressCardColored></div>
               </Container>
             </Tabs.Panel>
                   
@@ -201,6 +219,7 @@ function PriestPanel() {
           )}
         </>
       );
+      }
   };
 
   const getContentForDateOption = () => {

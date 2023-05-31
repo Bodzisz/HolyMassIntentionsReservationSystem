@@ -27,7 +27,7 @@ public class GoalController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Goal> getGoal(@PathVariable final int id) {
-        return ResponseEntity.ok(goalsService.getGoal(id));
+        return ResponseEntity.ok(goalsService.getGoalByParishId(id));
     }
 
     @PostMapping
@@ -44,6 +44,16 @@ public class GoalController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateGoal(@PathVariable int id, @RequestBody Goal updatedGoal) {
         goalCheck(updatedGoal);
+        goalsService.updateGoal(id, updatedGoal);
+        return ResponseEntity.status(204).build();
+    }
+
+    @PutMapping("reset/{id}")
+    public ResponseEntity<Void> resetGoal(@PathVariable int id) {
+        Goal updatedGoal = goalsService.getGoal(id);
+        updatedGoal.setGoal_title("Dobrobyt parafii");
+        updatedGoal.setAmount(1000);
+        updatedGoal.setGathered(0);
         goalsService.updateGoal(id, updatedGoal);
         return ResponseEntity.status(204).build();
     }
