@@ -72,14 +72,8 @@ public class GoalServiceImpl implements GoalService {
     @Override
     public void updateGoal(final int id, final Goal goal) {
         Goal existingGoal = goalRepository.findById(id).orElse(null);
-        if (existingGoal != null) {
-            existingGoal.setAmount(goal.getAmount());
-            int parishId = goal.getParish().getId();
-            Optional<Parish> parish = parishRepository.findById(parishId);
-            if (parish.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Parish of id=%d was not found", parishId));
-            existingGoal.setParish(parish.get());
-            goalRepository.save(existingGoal);
+        if (existingGoal != null && existingGoal.getId()==goal.getId()) {
+            goalRepository.save(goal);
         }
         else{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,

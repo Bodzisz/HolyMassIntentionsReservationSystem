@@ -10,6 +10,7 @@ import {
   Text,
   Modal, 
   Tabs,
+  TextInput,
 } from "@mantine/core";
 import { TimeInput, DatePicker, YearPicker } from "@mantine/dates";
 import { useEffect, useRef, useState } from "react";
@@ -17,7 +18,7 @@ import useFetch from "../api/useFetch";
 import { formatDate } from "../util/dateFormatter";
 import { config } from "../config/config";
 import { ProgressCardColored } from "./Progress"
-import { SliderInput } from "./OfferingBar"
+import SliderInput from "./OfferingBar"
 
 function PriestPanel() {
   const { data: churches, loading, error } = useFetch("churches");
@@ -25,6 +26,8 @@ function PriestPanel() {
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedChurch, setSelectedChurch] = useState(null);
   const massStartTimeRef = useRef();
+  const goalTitleRef = useRef();
+  const goalAmountRef = useRef();
   const [availableIntentions, setAvailableIntentions] = useState(1);
   const [selectedDateOption, setSelectedDateOption] = useState("1");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -77,6 +80,51 @@ function PriestPanel() {
     }
   };
 
+  const onClickResetGoal = (url) => {
+    console.log(url);
+    if (selectedGoal !== null && selectedChurch !== null) {
+      fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((data) => {
+        console.log(data);
+        setIsSaved(true);
+      })
+      .catch(() => {
+        setIsSaved(false);
+      })
+      .finally(() => {
+        setModalOpened(true);
+      });
+    }
+  };
+
+  const onClickUpdateGoal = (url, body) => {
+    console.log(body);
+    if (selectedGoal !== null && selectedChurch !== null) {
+      fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+      .then((data) => {
+        console.log(data);
+        setIsSaved(true);
+      })
+      .catch(() => {
+        setIsSaved(false);
+      })
+      .finally(() => {
+        setModalOpened(true);
+      });
+    }
+  };
+
   const getContent = () => {
     if (loading || loadingGoals)
       return (
@@ -94,8 +142,6 @@ function PriestPanel() {
     }
       
     else{
-      console.log('c');
-      console.log(churches);
       return (
         <>
           <Container style={{ paddingBottom: selectPadding }}>
@@ -113,7 +159,7 @@ function PriestPanel() {
                     setSelectedChurch(value);
                     const res = goals.filter(
                       (goal) => {
-                        return goal.parish.id === churches[selectedChurch].parish.id;
+                        return goal.parish.id === churches[value].parish.id;
                       }
                     )
                     const [desired] = res;
@@ -209,9 +255,30 @@ function PriestPanel() {
 
             <Tabs.Panel value="second" pt="xs">
               <Container>
-              <div class="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
-                <div class="accordion" ><SliderInput minimalOffering={2}></SliderInput></div>
-                <div class="progress" ><ProgressCardColored current={selectedGoal.gathered} goal={selectedGoal.amount} name={selectedGoal.goal_title}></ProgressCardColored></div>
+                <div><h3>Aktualna zbiórka:</h3></div>
+                <div className="progress" ><ProgressCardColored current={selectedGoal.gathered} goal={selectedGoal.amount} name={selectedGoal.goal_title}></ProgressCardColored></div>
+                <div className="accordion" ><Button size="xl" variant="gradient" gradient={{ from: "red", to: "maroon" }} onClick={()=>onClickResetGoal(config.apiBaseUrl + "goals/reset/"+selectedGoal.id)}>Resetuj dane zbiórki</Button></div>
+                <div><h3>Edytuj dane zbiórki:</h3></div>
+                <div className="accordion" ><SliderInput minimalOffering={100} label={"Cel pieniężny"} ref={goalAmountRef}></SliderInput></div>
+                <div className="accordion" ><TextInput placeholder={"Dobrobyt parafii"} label={"Cel zbiórki"} ref={goalTitleRef}></TextInput></div>
+                <div className="accordion" ><Button size="xl" variant="gradient" gradient={{ from: "yellow", to: "orange" }}
+                  onClick={()=>{
+                    onClickUpdateGoal(config.apiBaseUrl + "goals/"+selectedGoal.id, 
+                    {
+                      goal_title: goalTitleRef.current.value,
+                      amount: parseInt(goalAmountRef.current.value),
+                      gathered: 0,
+                      parish: selectedGoal.parish,
+                      id: selectedGoal.id
+                    }
+
+                  );}
+                
+                }
+                  >Edytuj
+                  </Button>
+                </div>
+               
               </Container>
             </Tabs.Panel>
                   
@@ -261,9 +328,9 @@ function PriestPanel() {
         centered
       >
         {isSaved ? (
-          <Text c="teal.4">Msze zostały dodane poprawnie</Text>
+          <Text c="teal.4">Zmiany zostały zapisane poprawnie</Text>
         ) : (
-          <Text c="red.4">Wystąpił błąd podczas dodawania mszy</Text>
+          <Text c="red.4">Wystąpił błąd podczas zapisywania zmian</Text>
         )}
       </Modal>
     </Container>

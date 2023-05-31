@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Title, Center, Select, createStyles, rem, Button, Group, } from '@mantine/core';
 import { ProgressCardColored } from './Progress';
-import { SliderInput } from './OfferingBar';  
+import SliderInput from './OfferingBar';  
 
 const useStyles = createStyles((theme) => ({
     wrapper: {
@@ -39,15 +39,6 @@ const OfferingPage = () => {
     }
   }, [selectedChurch]);
 
-  // Function to handle donation submission
-  const handleDonationSubmit = (e) => {
-    e.preventDefault();
-    // Logic to handle donation submission, update donationAmount state, etc.
-    // For simplicity, let's assume the newDonationAmount variable holds the updated donation amount
-
-    // Update the donationAmount state with the new value
-    setDonationAmount(donationAmount);
-  };
 
    // Fetch the list of churches from the API
    useEffect(() => {
@@ -108,10 +99,10 @@ const OfferingPage = () => {
             </Center>
           </Container>
 
-                <div class="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
-                <div class="accordion" ><SliderInput minimalOffering={2}></SliderInput></div>
-                <div class="progress" ><ProgressCardColored current={1027} goal={3000} name="Chodnik na plebanii"></ProgressCardColored></div>
-                <div class="accordion">
+                <div className="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
+                <div className="accordion" ><SliderInput minimalOffering={2} label={"Wysokość datku"}></SliderInput></div>
+                <div className="progress" ><ProgressCardColored current={1027} goal={3000} name="Chodnik na plebanii"></ProgressCardColored></div>
+                <div className="accordion">
                     <Group className={classes.controls}>
                         <Button
                             size="xl"

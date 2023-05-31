@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { createStyles, NumberInput, rem } from '@mantine/core';
 
 const useStyles = createStyles((theme) => ({
@@ -32,15 +32,17 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function SliderInput(props) {
+const SliderInput = forwardRef((props, ref) => {
   const { classes } = useStyles();
   const [value, setValue] = useState(50);
+
   return (
     <div className={classes.wrapper}>
       <NumberInput
+        ref={ref}
         value={value}
         onChange={setValue}
-        label="Wysokość datku"
+        label={props.label}
         placeholder="Twoja wysokość datku"
         defaultValue={50}
         step={10}
@@ -50,4 +52,6 @@ export function SliderInput(props) {
       />
     </div>
   );
-}
+});
+
+export default SliderInput;

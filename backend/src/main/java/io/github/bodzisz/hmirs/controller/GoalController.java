@@ -61,7 +61,7 @@ public class GoalController {
     private void goalCheck(Goal goal){
         if (goal.getAmount() <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid goal amount");
-        if (goal.getGathered() <= 0)
+        if (goal.getGathered() < 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid gathered amount");
         if (goal.getGoal_title().length() <= 3)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid goal title");
