@@ -26,7 +26,9 @@ const useStyles = createStyles((theme) => ({
 const OfferingPage = () => {
   const [donationAmount, setDonationAmount] = useState(0);
   const [churches, setChurches] = useState([]);
+  const [goals, setGoals] = useState([]);
   const [uniqueCities, setUniqueCities] = useState([]);
+  const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedChurch, setSelectedChurch] = useState('');
   const [selectPadding, setSelectPadding] = useState(rem(470));
@@ -54,7 +56,14 @@ const OfferingPage = () => {
             setUniqueCities(cities);
         })
       .catch((error) => console.error(error));
-  }, []);
+
+    fetch('http://localhost:8080/goals')
+      .then((response) => response.json())
+      .then((data) => {
+            setGoals(data)
+        })
+      .catch((error) => console.error(error));
+      });
 
   const { classes } = useStyles();
 
@@ -75,6 +84,7 @@ const OfferingPage = () => {
                 onChange={(value) => {
                   setSelectedCity(value);
                   setSelectedChurch(null);
+                  setSelectedGoal(null);
                 }}
                 mx="auto"
                 style={{ width: "400px" }}
@@ -92,7 +102,13 @@ const OfferingPage = () => {
                   label: church.name + " w " + church.city,
                 }))}
                 value={selectedChurch}
-                onChange={(value) => setSelectedChurch(value)}
+                onChange={(value) => {
+                  setSelectedChurch(value);
+                  console.log(value);
+                  const goalsRes = goals.filter((goal) => goal.parish.id === churches[value].parish.id);
+                  const [thisGoal] = goalsRes;
+                  setSelectedGoal(thisGoal);
+                }}
                 mx="auto"
                 style={{ width: "400px" }}
               />
@@ -101,7 +117,9 @@ const OfferingPage = () => {
 
                 <div className="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
                 <div className="accordion" ><SliderInput minimalOffering={2} label={"Wysokość datku"}></SliderInput></div>
-                <div className="progress" ><ProgressCardColored current={1027} goal={3000} name="Chodnik na plebanii"></ProgressCardColored></div>
+                <div className="progress" ><ProgressCardColored 
+                  current={selectedGoal===undefined || selectedGoal===null ? 0 : selectedGoal.gathered} goal={selectedGoal===undefined|| selectedGoal===null ? 0 : selectedGoal.amount}
+                  name={selectedGoal===undefined|| selectedGoal===null ? 'Brak zrzutki' : selectedGoal.goal_title}></ProgressCardColored></div>
                 <div className="accordion">
                     <Group className={classes.controls}>
                         <Button

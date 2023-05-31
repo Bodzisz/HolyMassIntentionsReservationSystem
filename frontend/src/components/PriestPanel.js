@@ -271,8 +271,9 @@ function PriestPanel() {
                       parish: selectedGoal.parish,
                       id: selectedGoal.id
                     }
-
-                  );}
+                  );
+                  
+                  ;}
                 
                 }
                   >Edytuj
