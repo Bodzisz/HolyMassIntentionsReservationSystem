@@ -8,18 +8,26 @@ import {
   NumberInput,
   Button,
   Text,
-  Modal,
+  Modal, 
+  Tabs,
+  TextInput,
 } from "@mantine/core";
 import { TimeInput, DatePicker, YearPicker } from "@mantine/dates";
 import { useEffect, useRef, useState } from "react";
 import useFetch from "../api/useFetch";
 import { formatDate } from "../util/dateFormatter";
 import { config } from "../config/config";
+import { ProgressCardColored } from "./Progress"
+import SliderInput from "./OfferingBar"
 
 function PriestPanel() {
   const { data: churches, loading, error } = useFetch("churches");
+  const { data: goals, loadingGoals, errorGoals } = useFetch("goals");
+  const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedChurch, setSelectedChurch] = useState(null);
   const massStartTimeRef = useRef();
+  const goalTitleRef = useRef();
+  const goalAmountRef = useRef();
   const [availableIntentions, setAvailableIntentions] = useState(1);
   const [selectedDateOption, setSelectedDateOption] = useState("1");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -72,20 +80,68 @@ function PriestPanel() {
     }
   };
 
+  const onClickResetGoal = (url) => {
+    console.log(url);
+    if (selectedGoal !== null && selectedChurch !== null) {
+      fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((data) => {
+        console.log(data);
+        setIsSaved(true);
+      })
+      .catch(() => {
+        setIsSaved(false);
+      })
+      .finally(() => {
+        setModalOpened(true);
+      });
+    }
+  };
+
+  const onClickUpdateGoal = (url, body) => {
+    console.log(body);
+    if (selectedGoal !== null && selectedChurch !== null) {
+      fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+      .then((data) => {
+        console.log(data);
+        setIsSaved(true);
+      })
+      .catch(() => {
+        setIsSaved(false);
+      })
+      .finally(() => {
+        setModalOpened(true);
+      });
+    }
+  };
+
   const getContent = () => {
-    if (loading)
+    if (loading || loadingGoals)
       return (
         <div style={{ paddingBottom: rem(110), paddingTop: rem(200) }}>
           <Loader size="xl" />
         </div>
       );
-    else if (error !== null)
+    else if (error !== null && errorGoals !== null)
+    {
       return (
         <Center>
           <div>Something went wrong</div>
         </Center>
       );
-    else
+    }
+      
+    else{
       return (
         <>
           <Container style={{ paddingBottom: selectPadding }}>
@@ -98,14 +154,34 @@ function PriestPanel() {
                   label: church.name + " w " + church.city,
                 }))}
                 value={selectedChurch}
-                onChange={(value) => setSelectedChurch(value)}
+                onChange={
+                  (value) => {
+                    setSelectedChurch(value);
+                    const res = goals.filter(
+                      (goal) => {
+                        return goal.parish.id === churches[value].parish.id;
+                      }
+                    )
+                    const [desired] = res;
+                    setSelectedGoal(desired);
+                }
+                }
                 mx="auto"
                 style={{ width: "400px" }}
               />
             </Center>
           </Container>
 
-          {selectedChurch && (
+          {selectedChurch && selectedGoal && (
+            <Tabs color="teal" defaultValue="first">
+            <Tabs.List>
+              <Tabs.Tab value="first">Zarządzanie mszami</Tabs.Tab>
+              <Tabs.Tab value="second" color="blue">
+                Zarządzanie celem zbiórki
+              </Tabs.Tab>
+            </Tabs.List>
+
+            <Tabs.Panel value="first" pt="xs">
             <Container>
               <h1>Dodaj mszę</h1>
 
@@ -175,9 +251,43 @@ function PriestPanel() {
                 </Button>
               </Group>
             </Container>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="second" pt="xs">
+              <Container>
+                <div><h3>Aktualna zbiórka:</h3></div>
+                <div className="progress" ><ProgressCardColored current={selectedGoal.gathered} goal={selectedGoal.amount} name={selectedGoal.goal_title}></ProgressCardColored></div>
+                <div className="accordion" ><Button size="xl" variant="gradient" gradient={{ from: "red", to: "maroon" }} onClick={()=>onClickResetGoal(config.apiBaseUrl + "goals/reset/"+selectedGoal.id)}>Resetuj dane zbiórki</Button></div>
+                <div><h3>Edytuj dane zbiórki:</h3></div>
+                <div className="accordion" ><SliderInput minimalOffering={100} label={"Cel pieniężny"} ref={goalAmountRef}></SliderInput></div>
+                <div className="accordion" ><TextInput placeholder={"Dobrobyt parafii"} label={"Cel zbiórki"} ref={goalTitleRef}></TextInput></div>
+                <div className="accordion" ><Button size="xl" variant="gradient" gradient={{ from: "yellow", to: "orange" }}
+                  onClick={()=>{
+                    onClickUpdateGoal(config.apiBaseUrl + "goals/"+selectedGoal.id, 
+                    {
+                      goal_title: goalTitleRef.current.value,
+                      amount: parseInt(goalAmountRef.current.value),
+                      gathered: 0,
+                      parish: selectedGoal.parish,
+                      id: selectedGoal.id
+                    }
+                  );
+                  
+                  ;}
+                
+                }
+                  >Edytuj
+                  </Button>
+                </div>
+               
+              </Container>
+            </Tabs.Panel>
+                  
+            </Tabs>
           )}
         </>
       );
+      }
   };
 
   const getContentForDateOption = () => {
@@ -219,9 +329,9 @@ function PriestPanel() {
         centered
       >
         {isSaved ? (
-          <Text c="teal.4">Msze zostały dodane poprawnie</Text>
+          <Text c="teal.4">Zmiany zostały zapisane poprawnie</Text>
         ) : (
-          <Text c="red.4">Wystąpił błąd podczas dodawania mszy</Text>
+          <Text c="red.4">Wystąpił błąd podczas zapisywania zmian</Text>
         )}
       </Modal>
     </Container>

@@ -1,7 +1,9 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
+import io.github.bodzisz.hmirs.entity.Goal;
 import io.github.bodzisz.hmirs.entity.Parish;
 import io.github.bodzisz.hmirs.entity.User;
+import io.github.bodzisz.hmirs.repository.GoalRepository;
 import io.github.bodzisz.hmirs.repository.ParishRepository;
 import io.github.bodzisz.hmirs.repository.UserRepository;
 import io.github.bodzisz.hmirs.service.ParishService;
@@ -16,11 +18,14 @@ import java.util.Optional;
 public class ParishServiceImpl implements ParishService {
 
     private final ParishRepository parishRepository;
+    private final GoalRepository goalRepository;
     private final UserRepository userRepository;
 
     public ParishServiceImpl(ParishRepository parishRepository,
+                                GoalRepository goalRepository,
                                 UserRepository userRepository){
         this.parishRepository = parishRepository;
+        this.goalRepository = goalRepository;
         this.userRepository = userRepository;
     }
 
@@ -44,7 +49,14 @@ public class ParishServiceImpl implements ParishService {
         if (user.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("User of id=%d was not found", userId));
         parish.setMainPriest(user.get());
-        return parishRepository.save(parish);
+        Goal goal = new Goal();
+        Parish new_parish = parishRepository.save(parish);
+        goal.setParish(new_parish);
+        goal.setGoal_title("Dobrobyt parafii");
+        goal.setGathered(0);
+        goal.setAmount(1000);
+        goalRepository.save(goal);
+        return new_parish;
     }
 
     @Override
@@ -52,6 +64,9 @@ public class ParishServiceImpl implements ParishService {
         Optional<Parish> toDelete = parishRepository.findById(id);
         if (toDelete.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Parish of id=%d was not found", id));
+        Parish parish = toDelete.get();
+        Goal goalToDelete = goalRepository.findGoalByParish(parish);
+        goalRepository.delete(goalToDelete);
         parishRepository.deleteById(id);
         return toDelete.get();
     }

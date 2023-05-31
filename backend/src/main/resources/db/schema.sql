@@ -55,6 +55,14 @@ CREATE TABLE Donations (
     amount INTEGER NOT NULL
 );
 
+CREATE TABLE Goals (
+    id  SERIAL PRIMARY KEY,
+    parish_id INTEGER REFERENCES Parishes(id),
+    gathered INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    goal_title VARCHAR(30)
+);
+
 ALTER TABLE Churches ADD CONSTRAINT fk_churches_parish FOREIGN KEY (parish_id) REFERENCES Parishes(id);
 
 ALTER TABLE Parishes ADD CONSTRAINT fk_parishes_main_priest FOREIGN KEY (main_priest_id) REFERENCES Users(id);
@@ -76,3 +84,5 @@ INSERT INTO Holy_Masses VALUES (1, '2023-05-23', '12:00:00', 2, 1);
 INSERT INTO Intentions VALUES (1, 'Na piwo', true, 1, 1);
 
 INSERT INTO Donations VALUES (1, 1, 1, 123);
+
+INSERT INTO Goals VALUES(1, 1, 0, 1000, 'Dobrobyt parafii')
