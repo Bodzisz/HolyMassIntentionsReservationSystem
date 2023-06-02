@@ -34,14 +34,14 @@ const useStyles = createStyles((theme) => ({
 
 const SliderInput = forwardRef((props, ref) => {
   const { classes } = useStyles();
-  const [value, setValue] = useState(50);
+  // const [value, setValue] = useState(50);
 
   return (
     <div className={classes.wrapper}>
       <NumberInput
         ref={ref}
-        value={value}
-        onChange={setValue}
+        value={props.value}
+        // onChange={setValue}
         label={props.label}
         placeholder="Twoja wysokość datku"
         defaultValue={50}
