@@ -1,15 +1,6 @@
 import { useEffect, useState } from "react";
 import { config } from "../config/config";
-
-const DEFAULT_HEADERS = {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers":
-      "Origin, X-Requested-With, Content-Type, Accept",
-  },
-};
+import { getHeaders } from "../util/requestHeaderProvider";
 
 function useFetch(url) {
   const [data, setData] = useState(null);
@@ -20,6 +11,11 @@ function useFetch(url) {
     setLoading(true);
     setData(null);
     setError(null);
+
+    const DEFAULT_HEADERS = {
+      method: "GET",
+      headers: getHeaders(),
+    };
 
     fetch(config.apiBaseUrl + url, DEFAULT_HEADERS)
       .then((response) => {

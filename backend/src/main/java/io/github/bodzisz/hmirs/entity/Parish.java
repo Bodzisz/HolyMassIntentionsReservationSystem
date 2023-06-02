@@ -17,4 +17,9 @@ public class Parish {
     @ManyToOne
     @JoinColumn(name = "main_priest_id")
     private User mainPriest;
+
+    public Parish(final String name, final User mainPriest) {
+        this.name = name;
+        this.mainPriest = mainPriest;
+    }
 }

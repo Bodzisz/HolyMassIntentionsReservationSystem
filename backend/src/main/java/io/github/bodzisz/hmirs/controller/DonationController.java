@@ -5,6 +5,7 @@ import io.github.bodzisz.hmirs.service.DonationsService;
 import io.github.bodzisz.hmirs.service.GoalService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/donations")
-@CrossOrigin(origins = "http://localhost:3000")
 public class DonationController {
 
     private final DonationsService donationsService;
@@ -33,6 +33,7 @@ public class DonationController {
         return ResponseEntity.ok(donationsService.getDonation(id));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<Donation> postDonation(@RequestBody final Donation donation) {
         donationCheck(donation);

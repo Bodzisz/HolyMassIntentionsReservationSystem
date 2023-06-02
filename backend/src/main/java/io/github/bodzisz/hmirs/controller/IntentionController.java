@@ -5,6 +5,7 @@ import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.service.IntentionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/intentions")
-@CrossOrigin(origins = "http://localhost:3000")
 public class IntentionController {
 
     private final IntentionService intentionService;
@@ -49,18 +49,21 @@ public class IntentionController {
         return ResponseEntity.ok(intentionService.getIntention(id));
     }
 
+    @PreAuthorize("hasRole('ROLE_PRIEST')")
     @PostMapping
     public ResponseEntity<Intention> postIntention(@RequestBody final NewIntentionDTO intention) {
         return ResponseEntity.ok(intentionService.addIntention(intention));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
     public ResponseEntity<Intention> deleteIntention(@PathVariable int id) {
         return ResponseEntity.ok(intentionService.deleteIntention(id));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateUser(@PathVariable int id, @RequestBody Intention updatedIntention) {
+    public ResponseEntity<Void> updateIntention(@PathVariable int id, @RequestBody Intention updatedIntention) {
         intentionCheck(updatedIntention);
         intentionService.updateIntention(id, updatedIntention);
         return ResponseEntity.status(204).build();
