@@ -46,7 +46,7 @@ const OfferingPage = () => {
     } else {
       setSelectPadding(rem(0));
     }
-  }, [selectedChurch]);
+  }, [selectedCity, selectedChurch]);
 
   const getGoals = (() => {
     fetch('http://localhost:8080/goals')
