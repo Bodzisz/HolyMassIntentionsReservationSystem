@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { createStyles, NumberInput, rem } from '@mantine/core';
 
 const useStyles = createStyles((theme) => ({

@@ -38,8 +38,6 @@ const OfferingPage = () => {
   const [selectedChurch, setSelectedChurch] = useState('');
   const [selectedParish, setSelectedParish] = useState(null);
   const [selectPadding, setSelectPadding] = useState(rem(470));
-  const [isModalOpened, setModalOpened] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const donationSize = useRef();
   
   useEffect(() => {
@@ -97,7 +95,6 @@ const OfferingPage = () => {
       })
       .then((data) => {
         console.log(data);
-        setIsSaved(true);
         const Goal = {
           id: selectedGoal.id,
           goal_title: selectedGoal.goal_title,
@@ -106,12 +103,6 @@ const OfferingPage = () => {
           parish: body.parish
         }
         setSelectedGoal(Goal);
-      })
-      .catch(() => {
-        setIsSaved(false);
-      })
-      .finally(() => {
-        setModalOpened(true);
       });
   }
 
