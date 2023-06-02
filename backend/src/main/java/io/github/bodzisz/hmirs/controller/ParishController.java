@@ -4,6 +4,7 @@ import io.github.bodzisz.hmirs.entity.Parish;
 import io.github.bodzisz.hmirs.service.ParishService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -11,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/parishes")
-@CrossOrigin(origins = "http://localhost:3000")
 public class ParishController {
 
     private final ParishService parishService;
@@ -30,17 +30,20 @@ public class ParishController {
         return ResponseEntity.ok(parishService.getParish(id));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<Parish> postParish(@RequestBody final Parish parish) {
         parishCheck(parish);
         return ResponseEntity.ok(parishService.addParish(parish));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Parish> deleteParish(@PathVariable int id) {
         return ResponseEntity.status(201).body(parishService.deleteParish(id));
     }
-    
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateParish(@PathVariable int id, @RequestBody Parish updatedParish) {
         parishCheck(updatedParish);

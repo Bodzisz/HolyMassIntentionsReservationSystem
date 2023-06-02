@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/holymasses")
-@CrossOrigin(origins = "http://localhost:3000")
 public class HolyMassController {
 
     private final HolyMassService holyMassService;

@@ -1,9 +1,12 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
+import io.github.bodzisz.hmirs.dto.NewUserDTO;
 import io.github.bodzisz.hmirs.entity.User;
 import io.github.bodzisz.hmirs.repository.UserRepository;
 import io.github.bodzisz.hmirs.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,11 +15,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
-    public UserServiceImpl(UserRepository userRepository){this.userRepository = userRepository;}
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> getUsers() {
@@ -32,12 +35,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addUser(User user) {
-        user.setId(0);
-        if (user.getPassword().length() < 3 || Objects.equals(user.getFirstName(), "")
-                || Objects.equals(user.getLastName(), "") || user.getLogin().length() < 3)
+    public User addUser(NewUserDTO user) {
+        User userToAdd = new User(user.firstName(), user.lastName(), user.login(), user.password(), user.role());
+        userToAdd.setId(0);
+        if (userToAdd.getPassword().length() < 3 || Objects.equals(userToAdd.getFirstName(), "")
+                || Objects.equals(userToAdd.getLastName(), "") || userToAdd.getLogin().length() < 3)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ("Passed data is invalid"));
-        return userRepository.save(user);
+        userToAdd.setPassword(passwordEncoder.encode(userToAdd.getPassword()));
+
+        return userRepository.save(userToAdd);
     }
 
     @Override
@@ -55,8 +61,6 @@ public class UserServiceImpl implements UserService {
         if (existingUser != null) {
             existingUser.setFirstName(user.getFirstName());
             existingUser.setLastName(user.getLastName());
-            existingUser.setTokenExpired(user.isTokenExpired());
-            existingUser.setEnabled(user.isEnabled());
             existingUser.setPassword(user.getPassword());
             existingUser.setLogin(user.getLogin());
             userRepository.save(existingUser);
@@ -69,6 +73,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean userExists(final String login){
-        return userRepository.findByLogin(login) == null;
+        return userRepository.existsByLogin(login);
+    }
+
+    @Override
+    public long getUsersCount() {
+        return userRepository.count();
+    }
+
+    @Override
+    public User getByLogin(String login) {
+        return userRepository.findByLogin(login);
     }
 }

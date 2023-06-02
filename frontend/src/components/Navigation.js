@@ -13,6 +13,8 @@ import {
   Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { getUser, logoutUser } from "../context/user";
+import { useEffect } from "react";
 
 const useStyles = createStyles((theme) => ({
   link: {
@@ -106,10 +108,20 @@ const contentPages = [
   },
 ];
 
-function Navigation({ activePage, setActivePage }) {
+function Navigation({ activePage, setActivePage, user, setUser }) {
   const { classes, theme } = useStyles();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
+
+  useEffect(() => {}, [user]);
+
+  const onClickLogin = () => {
+    setActivePage(6);
+  };
+
+  const onClickRegister = () => {
+    setActivePage(7);
+  };
 
   return (
     <Box pb={120}>
@@ -141,8 +153,29 @@ function Navigation({ activePage, setActivePage }) {
           </Group>
 
           <Group className={classes.hiddenMobile}>
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
+            {user === null ? (
+              <>
+                <Button variant="default" onClick={onClickLogin}>
+                  Logowanie
+                </Button>
+                <Button onClick={onClickRegister}>Rejestracja</Button>
+              </>
+            ) : (
+              <>
+                <Text color="black">
+                  {user.firstName + " " + user.lastName}
+                </Text>
+                <Button
+                  onClick={() => {
+                    logoutUser();
+                    setUser(getUser());
+                    setActivePage(1);
+                  }}
+                >
+                  Wyloguj
+                </Button>
+              </>
+            )}
           </Group>
 
           <Burger
@@ -191,8 +224,29 @@ function Navigation({ activePage, setActivePage }) {
           />
 
           <Group position="center" grow pb="xl" px="md">
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
+            {user === null ? (
+              <>
+                <Button variant="default" onClick={onClickLogin}>
+                  Logowanie
+                </Button>
+                <Button onClick={onClickRegister}>Rejestracja</Button>
+              </>
+            ) : (
+              <>
+                <Text color="black">
+                  {user.firstName + " " + user.lastName}
+                </Text>
+                <Button
+                  onClick={() => {
+                    logoutUser();
+                    setUser(getUser());
+                    setActivePage(1);
+                  }}
+                >
+                  Wyloguj
+                </Button>
+              </>
+            )}
           </Group>
         </ScrollArea>
       </Drawer>

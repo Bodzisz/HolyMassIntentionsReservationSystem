@@ -19,4 +19,11 @@ public class Church {
     @ManyToOne
     @JoinColumn(name = "parish_id")
     private Parish parish;
+
+    public Church(String name, String city, int minimalOffering, Parish parish) {
+        this.name = name;
+        this.city = city;
+        this.minimalOffering = minimalOffering;
+        this.parish = parish;
+    }
 }

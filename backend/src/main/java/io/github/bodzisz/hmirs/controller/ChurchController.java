@@ -6,6 +6,7 @@ import io.github.bodzisz.hmirs.entity.Intention;
 import io.github.bodzisz.hmirs.service.ChurchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/churches")
-@CrossOrigin(origins = "http://localhost:3000")
 public class ChurchController {
 
     private final ChurchService churchService;
@@ -47,17 +47,20 @@ public class ChurchController {
         return ResponseEntity.ok(churchService.getChurchIntentions(id));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<Church> postChurch(@RequestBody final Church church) {
         churchCheck(church);
         return ResponseEntity.status(201).body(churchService.addChurch(church));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Church> deleteChurch(@PathVariable int id) {
         return ResponseEntity.status(201).body(churchService.deleteChurch(id));
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateChurch(@PathVariable int id, @RequestBody Church updatedChurch) {
         churchCheck(updatedChurch);

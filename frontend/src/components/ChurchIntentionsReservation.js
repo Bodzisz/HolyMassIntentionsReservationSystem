@@ -15,10 +15,13 @@ import {
   Center,
   Alert,
   Indicator,
+  Text,
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import dayjs from "dayjs";
 import { formatDate } from "../util/dateFormatter";
+import { getUser } from "../context/user";
+import { getHeaders } from "../util/requestHeaderProvider";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -28,13 +31,6 @@ const useStyles = createStyles((theme) => ({
     paddingBottom: rem(50),
   },
 }));
-
-const DEFAULT_HEADERS = {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-  },
-};
 
 function ChurchIntentionsReservation({ church, goBackToChurchList }) {
   const { classes } = useStyles();
@@ -52,6 +48,11 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
   const [currentIntentions, setCurrentIntentions] = useState(null);
   const [intentionsLoading, setIntentionsLoading] = useState(false);
   const [intentionsError, setIntentionsError] = useState(false);
+
+  const DEFAULT_HEADERS = {
+    method: "GET",
+    headers: getHeaders(),
+  };
 
   useEffect(() => {
     setHolyMassesLoading(true);
@@ -182,6 +183,11 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
             <div>
               <div style={{ paddingBottom: "30px" }}>
                 <Title order={2}>Rezerwacja Intencji</Title>
+                {getUser() === null && (
+                  <div style={{ paddingBottom: "20px", paddingTop: "20px" }}>
+                    <Text c="blue">Zaloguj się, aby zarezerwować intencje</Text>
+                  </div>
+                )}
                 <Table>
                   <thead>
                     <tr>
@@ -199,7 +205,10 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                           <td>
                             {mass.availableIntentions > 0 &&
                               !dayjs().isAfter(mass.date) && (
-                                <Button onClick={() => setSelectedMass(mass)}>
+                                <Button
+                                  disabled={getUser() === null}
+                                  onClick={() => setSelectedMass(mass)}
+                                >
                                   Zarezerwuj
                                 </Button>
                               )}
@@ -306,6 +315,9 @@ function ChurchIntentionsReservation({ church, goBackToChurchList }) {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
+                  Authorization: `Bearer ${
+                    getUser() === null ? null : getUser().jwtToken
+                  }`,
                 },
                 body: JSON.stringify(body),
               })

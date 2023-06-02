@@ -8,7 +8,7 @@ import {
   NumberInput,
   Button,
   Text,
-  Modal, 
+  Modal,
   Tabs,
   TextInput,
 } from "@mantine/core";
@@ -17,8 +17,10 @@ import { useEffect, useRef, useState } from "react";
 import useFetch from "../api/useFetch";
 import { formatDate } from "../util/dateFormatter";
 import { config } from "../config/config";
-import { ProgressCardColored } from "./Progress"
-import SliderInput from "./OfferingBar"
+import { getUser } from "../context/user";
+import { ProgressCardColored } from "./Progress";
+import SliderInput from "./OfferingBar";
+import { getHeaders } from "../util/requestHeaderProvider";
 
 function PriestPanel() {
   const { data: churches, loading, error } = useFetch("churches");
@@ -45,14 +47,14 @@ function PriestPanel() {
     }
   }, [selectedChurch]);
 
-  const getGoals = (() => {
-    fetch('http://localhost:8080/goals')
-    .then((response) => response.json())
-    .then((data) => {
-          setGoals(data);
+  const getGoals = () => {
+    fetch("http://localhost:8080/goals")
+      .then((response) => response.json())
+      .then((data) => {
+        setGoals(data);
       })
-    .catch((error) => console.error(error));
-  })
+      .catch((error) => console.error(error));
+  };
 
   const dateOptions = [
     { value: "1", label: "Jeden dzień" },
@@ -67,6 +69,9 @@ function PriestPanel() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${
+            getUser() === null ? null : getUser().jwtToken
+          }`,
         },
         body: JSON.stringify(body),
       })
@@ -95,33 +100,31 @@ function PriestPanel() {
     if (selectedGoal !== null && selectedChurch !== null) {
       fetch(url, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getHeaders(),
       })
-      .then((data) => {
-        console.log(data);
-        if(data.status >= 200 && data.status < 300)
-        {
-          setIsSaved(true);
-          getGoals();
-          const Goal = {
-            id: selectedGoal.id,
-            goal_title: 'Dobrobyt parafii',
-            amount: 1000,
-            gathered: 0,
-            parish: selectedGoal.parish
+        .then((data) => {
+          console.log(data);
+          if (data.status >= 200 && data.status < 300) {
+            setIsSaved(true);
+            getGoals();
+            const Goal = {
+              id: selectedGoal.id,
+              goal_title: "Dobrobyt parafii",
+              amount: 1000,
+              gathered: 0,
+              parish: selectedGoal.parish,
+            };
+            setSelectedGoal(Goal);
+          } else {
+            setIsSaved(false);
           }
-          setSelectedGoal(Goal);
-        }
-        else {setIsSaved(false);}
-      })
-      .catch(() => {
-        setIsSaved(false);
-      })
-      .finally(() => {
-        setModalOpened(true);
-      });
+        })
+        .catch(() => {
+          setIsSaved(false);
+        })
+        .finally(() => {
+          setModalOpened(true);
+        });
     }
   };
 
@@ -130,34 +133,32 @@ function PriestPanel() {
     if (selectedGoal !== null && selectedChurch !== null) {
       fetch(url, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getHeaders(),
         body: JSON.stringify(body),
       })
-      .then((data) => {
-        console.log(data);
-        if(data.status >= 200 && data.status < 300)
-        {
-          setIsSaved(true);
-          getGoals();
-          const Goal = {
-            id: selectedGoal.id,
-            goal_title: body.goal_title,
-            amount: body.amount,
-            gathered: 0,
-            parish: selectedGoal.parish
+        .then((data) => {
+          console.log(data);
+          if (data.status >= 200 && data.status < 300) {
+            setIsSaved(true);
+            getGoals();
+            const Goal = {
+              id: selectedGoal.id,
+              goal_title: body.goal_title,
+              amount: body.amount,
+              gathered: 0,
+              parish: selectedGoal.parish,
+            };
+            setSelectedGoal(Goal);
+          } else {
+            setIsSaved(false);
           }
-          setSelectedGoal(Goal);
-        }
-        else {setIsSaved(false);}
-      })
-      .catch(() => {
-        setIsSaved(false);
-      })
-      .finally(() => {
-        setModalOpened(true);
-      });
+        })
+        .catch(() => {
+          setIsSaved(false);
+        })
+        .finally(() => {
+          setModalOpened(true);
+        });
     }
   };
 
@@ -168,16 +169,13 @@ function PriestPanel() {
           <Loader size="xl" />
         </div>
       );
-    else if (error !== null)
-    {
+    else if (error !== null) {
       return (
         <Center>
           <div>Something went wrong</div>
         </Center>
       );
-    }
-      
-    else{
+    } else {
       return (
         <>
           <Container style={{ paddingBottom: selectPadding }}>
@@ -190,18 +188,14 @@ function PriestPanel() {
                   label: church.name + " w " + church.city,
                 }))}
                 value={selectedChurch}
-                onChange={
-                  (value) => {
-                    setSelectedChurch(value);
-                    const res = goals.filter(
-                      (goal) => {
-                        return goal.parish.id === churches[value].parish.id;
-                      }
-                    )
-                    const [desired] = res;
-                    setSelectedGoal(desired);
-                }
-                }
+                onChange={(value) => {
+                  setSelectedChurch(value);
+                  const res = goals.filter((goal) => {
+                    return goal.parish.id === churches[value].parish.id;
+                  });
+                  const [desired] = res;
+                  setSelectedGoal(desired);
+                }}
                 mx="auto"
                 style={{ width: "400px" }}
               />
@@ -210,119 +204,156 @@ function PriestPanel() {
 
           {selectedChurch && selectedGoal && (
             <Tabs color="teal" defaultValue="first">
-            <Tabs.List>
-              <Tabs.Tab value="first">Zarządzanie mszami</Tabs.Tab>
-              <Tabs.Tab value="second" color="blue">
-                Zarządzanie celem zbiórki
-              </Tabs.Tab>
-            </Tabs.List>
+              <Tabs.List>
+                <Tabs.Tab value="first">Zarządzanie mszami</Tabs.Tab>
+                <Tabs.Tab value="second" color="blue">
+                  Zarządzanie celem zbiórki
+                </Tabs.Tab>
+              </Tabs.List>
 
-            <Tabs.Panel value="first" pt="xs">
-            <Container>
-              <h1>Dodaj mszę</h1>
+              <Tabs.Panel value="first" pt="xs">
+                <Container>
+                  <h1>Dodaj mszę</h1>
 
-              <Group style={{ paddingBottom: "20px" }}>
-                <TimeInput
-                  label="Wpisz godzinę rozpoczęcia mszy"
-                  ref={massStartTimeRef}
-                  maw={400}
-                  mx="auto"
-                  required
-                />
-                <NumberInput
-                  value={availableIntentions}
-                  onChange={(value) => setAvailableIntentions(value)}
-                  label="Wpisz liczbę dostępnych intencji"
-                  withAsterisk
-                  min={0}
-                  mx="auto"
-                  required
-                />
-              </Group>
+                  <Group style={{ paddingBottom: "20px" }}>
+                    <TimeInput
+                      label="Wpisz godzinę rozpoczęcia mszy"
+                      ref={massStartTimeRef}
+                      maw={400}
+                      mx="auto"
+                      required
+                    />
+                    <NumberInput
+                      value={availableIntentions}
+                      onChange={(value) => setAvailableIntentions(value)}
+                      label="Wpisz liczbę dostępnych intencji"
+                      withAsterisk
+                      min={0}
+                      mx="auto"
+                      required
+                    />
+                  </Group>
 
-              <Container style={{ paddingBottom: "50px" }}>
-                <Center>
-                  <h3>Wybierz datę</h3>
-                </Center>
-                <Center>
-                  <Select
-                    data={dateOptions}
-                    defaultValue={selectedDateOption}
-                    value={selectedDateOption}
-                    onChange={(value) => setSelectedDateOption(value)}
-                    style={{ paddingBottom: "30px" }}
-                  />
-                </Center>
+                  <Container style={{ paddingBottom: "50px" }}>
+                    <Center>
+                      <h3>Wybierz datę</h3>
+                    </Center>
+                    <Center>
+                      <Select
+                        data={dateOptions}
+                        defaultValue={selectedDateOption}
+                        value={selectedDateOption}
+                        onChange={(value) => setSelectedDateOption(value)}
+                        style={{ paddingBottom: "30px" }}
+                      />
+                    </Center>
 
-                <Center>{getContentForDateOption()}</Center>
-              </Container>
+                    <Center>{getContentForDateOption()}</Center>
+                  </Container>
 
-              <Group position="right">
-                <Button
-                  onClick={() => {
-                    if (selectedDateOption === "1") {
-                      onClickAddMass(config.apiBaseUrl + "holymasses", {
-                        date: formatDate(selectedDate),
-                        startTime: massStartTimeRef.current.value + ":00",
-                        availableIntentions: availableIntentions,
-                        churchId: Number(selectedChurch),
-                      });
-                    } else {
-                      onClickAddMass(
-                        `${
-                          config.apiBaseUrl
-                        }holymasses/addForYear/${selectedYear.getFullYear()}?forSundays=${
-                          selectedDateOption === "3"
-                        }`,
-                        {
-                          startTime: massStartTimeRef.current.value + ":00",
-                          availableIntentions: availableIntentions,
-                          churchId: Number(selectedChurch),
+                  <Group position="right">
+                    <Button
+                      onClick={() => {
+                        if (selectedDateOption === "1") {
+                          onClickAddMass(config.apiBaseUrl + "holymasses", {
+                            date: formatDate(selectedDate),
+                            startTime: massStartTimeRef.current.value + ":00",
+                            availableIntentions: availableIntentions,
+                            churchId: Number(selectedChurch),
+                          });
+                        } else {
+                          onClickAddMass(
+                            `${
+                              config.apiBaseUrl
+                            }holymasses/addForYear/${selectedYear.getFullYear()}?forSundays=${
+                              selectedDateOption === "3"
+                            }`,
+                            {
+                              startTime: massStartTimeRef.current.value + ":00",
+                              availableIntentions: availableIntentions,
+                              churchId: Number(selectedChurch),
+                            }
+                          );
                         }
-                      );
-                    }
-                  }}
-                >
-                  Dodaj
-                </Button>
-              </Group>
-            </Container>
-            </Tabs.Panel>
+                      }}
+                    >
+                      Dodaj
+                    </Button>
+                  </Group>
+                </Container>
+              </Tabs.Panel>
 
-            <Tabs.Panel value="second" pt="xs">
-              <Container>
-                <div><h3>Aktualna zbiórka:</h3></div>
-                <div className="progress" ><ProgressCardColored current={selectedGoal.gathered} goal={selectedGoal.amount} name={selectedGoal.goal_title}></ProgressCardColored></div>
-                <div className="accordion" ><Button size="xl" variant="gradient" gradient={{ from: "red", to: "maroon" }} onClick={()=>onClickResetGoal(config.apiBaseUrl + "goals/reset/"+selectedGoal.id)}>Resetuj dane zbiórki</Button></div>
-                <div><h3>Edytuj dane zbiórki:</h3></div>
-                <div className="accordion" ><SliderInput minimalOffering={100} label={"Cel pieniężny"} ref={goalAmountRef}></SliderInput></div>
-                <div className="accordion" ><TextInput placeholder={"Dobrobyt parafii"} label={"Cel zbiórki"} ref={goalTitleRef}></TextInput></div>
-                <div className="accordion" ><Button size="xl" variant="gradient" gradient={{ from: "yellow", to: "orange" }}
-                  onClick={()=>{
-                    onClickUpdateGoal(config.apiBaseUrl + "goals/"+selectedGoal.id, 
-                    {
-                      goal_title: goalTitleRef.current.value,
-                      amount: parseInt(goalAmountRef.current.value),
-                      gathered: 0,
-                      parish: selectedGoal.parish,
-                      id: selectedGoal.id
-                    }
-                  );
-                }
-                
-                }
-                  >Edytuj
-                  </Button>
-                </div>
-               
-              </Container>
-            </Tabs.Panel>
-                  
+              <Tabs.Panel value="second" pt="xs">
+                <Container>
+                  <div>
+                    <h3>Aktualna zbiórka:</h3>
+                  </div>
+                  <div className="progress">
+                    <ProgressCardColored
+                      current={selectedGoal.gathered}
+                      goal={selectedGoal.amount}
+                      name={selectedGoal.goal_title}
+                    ></ProgressCardColored>
+                  </div>
+                  <div className="accordion">
+                    <Button
+                      size="xl"
+                      variant="gradient"
+                      gradient={{ from: "red", to: "maroon" }}
+                      onClick={() =>
+                        onClickResetGoal(
+                          config.apiBaseUrl + "goals/reset/" + selectedGoal.id
+                        )
+                      }
+                    >
+                      Resetuj dane zbiórki
+                    </Button>
+                  </div>
+                  <div>
+                    <h3>Edytuj dane zbiórki:</h3>
+                  </div>
+                  <div className="accordion">
+                    <SliderInput
+                      minimalOffering={100}
+                      label={"Cel pieniężny"}
+                      ref={goalAmountRef}
+                    ></SliderInput>
+                  </div>
+                  <div className="accordion">
+                    <TextInput
+                      placeholder={"Dobrobyt parafii"}
+                      label={"Cel zbiórki"}
+                      ref={goalTitleRef}
+                    ></TextInput>
+                  </div>
+                  <div className="accordion">
+                    <Button
+                      size="xl"
+                      variant="gradient"
+                      gradient={{ from: "yellow", to: "orange" }}
+                      onClick={() => {
+                        onClickUpdateGoal(
+                          config.apiBaseUrl + "goals/" + selectedGoal.id,
+                          {
+                            goal_title: goalTitleRef.current.value,
+                            amount: parseInt(goalAmountRef.current.value),
+                            gathered: 0,
+                            parish: selectedGoal.parish,
+                            id: selectedGoal.id,
+                          }
+                        );
+                      }}
+                    >
+                      Edytuj
+                    </Button>
+                  </div>
+                </Container>
+              </Tabs.Panel>
             </Tabs>
           )}
         </>
       );
-      }
+    }
   };
 
   const getContentForDateOption = () => {

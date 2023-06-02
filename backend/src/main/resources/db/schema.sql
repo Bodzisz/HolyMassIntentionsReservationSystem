@@ -33,9 +33,8 @@ CREATE TABLE Users (
     first_name   VARCHAR(50) NOT NULL,
     last_name    VARCHAR(50) NOT NULL,
     login   VARCHAR(50) NOT NULL UNIQUE,
-    password    VARCHAR(50) NOT NULL,
-    enabled     BOOLEAN,
-    token_expired   BOOLEAN
+    password    VARCHAR(255) NOT NULL,
+    role    VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE Roles (
@@ -71,9 +70,6 @@ ALTER TABLE Holy_Masses ADD CONSTRAINT fk_holyMasses_church FOREIGN KEY (church_
 
 ALTER TABLE Intentions ADD CONSTRAINT fk_intentions_holyMass FOREIGN KEY (holy_mass_id) REFERENCES Holy_Masses(id);
 ALTER TABLE Intentions ADD CONSTRAINT fk_intentions_user FOREIGN KEY (user_id) REFERENCES Users(id);
-
-
-INSERT INTO Users VALUES (1, 'Kacper', 'Wojcicki', 'kacpiw', '123', true, false);
 
 INSERT INTO Parishes VALUES (1, 'Mariusza Pudzianowskiego', 1);
 
