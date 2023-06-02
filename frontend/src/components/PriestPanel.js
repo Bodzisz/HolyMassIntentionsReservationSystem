@@ -22,7 +22,7 @@ import SliderInput from "./OfferingBar"
 
 function PriestPanel() {
   const { data: churches, loading, error } = useFetch("churches");
-  const { data: goals, loadingGoals, errorGoals } = useFetch("goals");
+  const [goals, setGoals] = useState([]);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedChurch, setSelectedChurch] = useState(null);
   const massStartTimeRef = useRef();
@@ -38,11 +38,21 @@ function PriestPanel() {
 
   useEffect(() => {
     if (selectedChurch === null) {
+      getGoals();
       setSelectPadding(rem(470));
     } else {
       setSelectPadding(rem(0));
     }
   }, [selectedChurch]);
+
+  const getGoals = (() => {
+    fetch('http://localhost:8080/goals')
+    .then((response) => response.json())
+    .then((data) => {
+          setGoals(data);
+      })
+    .catch((error) => console.error(error));
+  })
 
   const dateOptions = [
     { value: "1", label: "Jeden dzień" },
@@ -91,7 +101,20 @@ function PriestPanel() {
       })
       .then((data) => {
         console.log(data);
-        setIsSaved(true);
+        if(data.status >= 200 && data.status < 300)
+        {
+          setIsSaved(true);
+          getGoals();
+          const Goal = {
+            id: selectedGoal.id,
+            goal_title: 'Dobrobyt parafii',
+            amount: 1000,
+            gathered: 0,
+            parish: selectedGoal.parish
+          }
+          setSelectedGoal(Goal);
+        }
+        else {setIsSaved(false);}
       })
       .catch(() => {
         setIsSaved(false);
@@ -114,7 +137,20 @@ function PriestPanel() {
       })
       .then((data) => {
         console.log(data);
-        setIsSaved(true);
+        if(data.status >= 200 && data.status < 300)
+        {
+          setIsSaved(true);
+          getGoals();
+          const Goal = {
+            id: selectedGoal.id,
+            goal_title: body.goal_title,
+            amount: body.amount,
+            gathered: 0,
+            parish: selectedGoal.parish
+          }
+          setSelectedGoal(Goal);
+        }
+        else {setIsSaved(false);}
       })
       .catch(() => {
         setIsSaved(false);
@@ -126,13 +162,13 @@ function PriestPanel() {
   };
 
   const getContent = () => {
-    if (loading || loadingGoals)
+    if (loading)
       return (
         <div style={{ paddingBottom: rem(110), paddingTop: rem(200) }}>
           <Loader size="xl" />
         </div>
       );
-    else if (error !== null && errorGoals !== null)
+    else if (error !== null)
     {
       return (
         <Center>
@@ -272,8 +308,7 @@ function PriestPanel() {
                       id: selectedGoal.id
                     }
                   );
-                  
-                  ;}
+                }
                 
                 }
                   >Edytuj

@@ -24,7 +24,6 @@ const useStyles = createStyles((theme) => ({
 
 export function ProgressCardColored(props) {
   const { classes } = useStyles();
-  console.log('esssaaaprogres')
   return (
     <Card withBorder radius="md" p="xl" className={classes.card}>
       <Text fz="xs" tt="uppercase" fw={700} className={classes.title}>
