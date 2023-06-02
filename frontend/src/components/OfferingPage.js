@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Title, Center, Select, createStyles, rem, Button, Group, } from '@mantine/core';
 import { ProgressCardColored } from './Progress';
 import SliderInput from './OfferingBar';  
+import { config } from "../config/config";
+
+
+const User = {
+    "id": 1
+};
 
 const useStyles = createStyles((theme) => ({
     wrapper: {
@@ -24,14 +30,15 @@ const useStyles = createStyles((theme) => ({
   }));
 
 const OfferingPage = () => {
-  const [donationAmount, setDonationAmount] = useState(0);
   const [churches, setChurches] = useState([]);
   const [goals, setGoals] = useState([]);
   const [uniqueCities, setUniqueCities] = useState([]);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedChurch, setSelectedChurch] = useState('');
+  const [selectedParish, setSelectedParish] = useState(null);
   const [selectPadding, setSelectPadding] = useState(rem(470));
+  const donationSize = useRef();
   
   useEffect(() => {
     if (selectedCity === null) {
@@ -39,8 +46,16 @@ const OfferingPage = () => {
     } else {
       setSelectPadding(rem(0));
     }
-  }, [selectedChurch]);
+  }, [selectedCity, selectedChurch]);
 
+  const getGoals = (() => {
+    fetch('http://localhost:8080/goals')
+    .then((response) => response.json())
+    .then((data) => {
+          setGoals(data);
+      })
+    .catch((error) => console.error(error));
+  })
 
    // Fetch the list of churches from the API
    useEffect(() => {
@@ -54,18 +69,42 @@ const OfferingPage = () => {
             });
             setChurches(data);
             setUniqueCities(cities);
+            getGoals();
         })
       .catch((error) => console.error(error));
-
-    fetch('http://localhost:8080/goals')
-      .then((response) => response.json())
-      .then((data) => {
-            setGoals(data)
-        })
-      .catch((error) => console.error(error));
-      });
+    }, []);
 
   const { classes } = useStyles();
+
+  const sendDonation = (url, body) => {
+    console.log(JSON.stringify(body));
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+      .then((response) => {
+        console.log(response);
+        if (response.status >= 200 && response.status < 300)
+          return response.json();
+        else {
+          throw Error(response.status);
+        }
+      })
+      .then((data) => {
+        console.log(data);
+        const Goal = {
+          id: selectedGoal.id,
+          goal_title: selectedGoal.goal_title,
+          amount: selectedGoal.amount,
+          gathered: selectedGoal.gathered + body.amount,
+          parish: body.parish
+        }
+        setSelectedGoal(Goal);
+      });
+  }
 
   return (
     <div>
@@ -104,7 +143,7 @@ const OfferingPage = () => {
                 value={selectedChurch}
                 onChange={(value) => {
                   setSelectedChurch(value);
-                  console.log(value);
+                  setSelectedParish(churches[value].parish)
                   const goalsRes = goals.filter((goal) => goal.parish.id === churches[value].parish.id);
                   const [thisGoal] = goalsRes;
                   setSelectedGoal(thisGoal);
@@ -116,18 +155,24 @@ const OfferingPage = () => {
           </Container>
 
                 <div className="accordion">Wybierz wymiar datku, którym chcesz wesprzeć swoją lokalną społeczność:</div>
-                <div className="accordion" ><SliderInput minimalOffering={2} label={"Wysokość datku"}></SliderInput></div>
+                <div className="accordion" ><SliderInput minimalOffering={2} label={"Wysokość datku"} ref={donationSize}></SliderInput></div>
                 <div className="progress" ><ProgressCardColored 
                   current={selectedGoal===undefined || selectedGoal===null ? 0 : selectedGoal.gathered} goal={selectedGoal===undefined|| selectedGoal===null ? 0 : selectedGoal.amount}
                   name={selectedGoal===undefined|| selectedGoal===null ? 'Brak zrzutki' : selectedGoal.goal_title}></ProgressCardColored></div>
                 <div className="accordion">
                     <Group className={classes.controls}>
-                        <Button
-                            size="xl"
-                            className={classes.control}
-                            variant="gradient"
-                            gradient={{ from: "blue", to: "cyan" }}
-                        >
+                        <Button size="xl" className={classes.control} variant="gradient" gradient={{ from: "blue", to: "cyan" }}
+                         onClick={() => {
+                          sendDonation(
+                            config.apiBaseUrl + "donations",
+                            {
+                              user: User,
+                              parish: selectedParish,
+                              amount: parseInt(donationSize.current.value)
+                            }
+                          );
+                          getGoals();
+                         }}>
                             Wspomóż wybrany kościół
                             
                         </Button>
