@@ -38,6 +38,8 @@ const OfferingPage = () => {
   const [selectedChurch, setSelectedChurch] = useState('');
   const [selectedParish, setSelectedParish] = useState(null);
   const [selectPadding, setSelectPadding] = useState(rem(470));
+  const [isModalOpened, setModalOpened] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const donationSize = useRef();
   
   useEffect(() => {
