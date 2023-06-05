@@ -89,22 +89,27 @@ const contentPages = [
   {
     id: 1,
     title: "Strona główna",
+    roles: [],
   },
   {
     id: 2,
     title: "Kościoły",
+    roles: [],
   },
   {
     id: 3,
     title: "Wirtualna Taca",
+    roles: [],
   },
   {
     id: 4,
     title: "Panel Księdza",
+    roles: ["PRIEST"],
   },
   {
     id: 5,
     title: "Kontakt",
+    roles: [],
   },
 ];
 
@@ -137,19 +142,27 @@ function Navigation({ activePage, setActivePage, user, setUser }) {
             spacing={0}
             className={classes.hiddenMobile}
           >
-            {contentPages.map((page) => (
-              <a
-                href="/#"
-                onClick={() => setActivePage(page.id)}
-                key={page.id}
-                className={classes.link}
-                style={{
-                  color: activePage === page.id ? theme.colors.blue[5] : null,
-                }}
-              >
-                <Text>{page.title}</Text>
-              </a>
-            ))}
+            {contentPages.map((page) => {
+              if (
+                page.roles.length === 0 ||
+                (user !== null && page.roles.includes(user.role))
+              ) {
+                return (
+                  <a
+                    href="/#"
+                    onClick={() => setActivePage(page.id)}
+                    key={page.id}
+                    className={classes.link}
+                    style={{
+                      color:
+                        activePage === page.id ? theme.colors.blue[5] : null,
+                    }}
+                  >
+                    <Text>{page.title}</Text>
+                  </a>
+                );
+              } else return null;
+            })}
           </Group>
 
           <Group className={classes.hiddenMobile}>

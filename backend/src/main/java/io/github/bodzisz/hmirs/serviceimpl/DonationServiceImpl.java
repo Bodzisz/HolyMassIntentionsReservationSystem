@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
+import io.github.bodzisz.hmirs.dto.NewDonationDTO;
 import io.github.bodzisz.hmirs.entity.Donation;
 import io.github.bodzisz.hmirs.entity.Parish;
 import io.github.bodzisz.hmirs.entity.User;
@@ -43,18 +44,18 @@ public class DonationServiceImpl implements DonationsService {
     }
 
     @Override
-    public Donation addDonation(Donation donation) {
-        int userId = donation.getUser().getId();
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("User of id=%d was not found", userId));
-        int parishId = donation.getParish().getId();
-        Optional<Parish> parish = parishRepository.findById(parishId);
+    public Donation addDonation(NewDonationDTO donation) {
+        User user = userRepository.findByLogin(donation.userLogin());
+        if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("User with login %s was not found", donation.userLogin()));
+        Optional<Parish> parish = parishRepository.findById(donation.parishId());
         if (parish.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("Parish of id=%d was not found", parishId));
-        donation.setUser(user.get());
-        donation.setParish(parish.get());
-        return donationRepository.save(donation);
+                String.format("Parish of id=%d was not found", donation.parishId()));
+        Donation newDonation = new Donation();
+        newDonation.setAmount(donation.amount());
+        newDonation.setUser(user);
+        newDonation.setParish(parish.get());
+        return donationRepository.save(newDonation);
     }
 
     @Override
