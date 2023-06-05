@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.controller;
 
+import io.github.bodzisz.hmirs.dto.NewDonationDTO;
 import io.github.bodzisz.hmirs.entity.Donation;
 import io.github.bodzisz.hmirs.service.DonationsService;
 import io.github.bodzisz.hmirs.service.GoalService;
@@ -35,9 +36,8 @@ public class DonationController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping
-    public ResponseEntity<Donation> postDonation(@RequestBody final Donation donation) {
-        donationCheck(donation);
-        goalService.addProgress(goalService.getGoalByParish(donation.getParish()),donation.getAmount());
+    public ResponseEntity<Donation> postDonation(@RequestBody final NewDonationDTO donation) {
+        goalService.addProgress(goalService.getGoalByParishId(donation.parishId()),donation.amount());
         return ResponseEntity.ok(donationsService.addDonation(donation));
     }
 
@@ -48,17 +48,7 @@ public class DonationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateDonation(@PathVariable int id, @RequestBody Donation updatedDonation) {
-        donationCheck(updatedDonation);
         donationsService.updateDonation(id, updatedDonation);
         return ResponseEntity.status(204).build();
-    }
-
-    private void donationCheck(Donation donation){
-        if (donation.getAmount() <= 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid donation size");
-        if (donation.getUser() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user");
-        if (donation.getParish() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid parish");
     }
 }

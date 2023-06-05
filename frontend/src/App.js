@@ -25,7 +25,7 @@ function App() {
       case 2:
         return <ChurchList />;
       case 3:
-        return <OfferingPage />;
+        return <OfferingPage user={user} />;
       case 4:
         return <PriestPanel />;
       case 6:
