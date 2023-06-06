@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.service;
 
+import io.github.bodzisz.hmirs.dto.GoalDTO;
 import io.github.bodzisz.hmirs.entity.Goal;
 import io.github.bodzisz.hmirs.entity.Parish;
 
@@ -11,11 +12,11 @@ public interface GoalService {
 
     Goal getGoal(final int id);
 
-    Goal addGoal(final Goal goal);
+    Goal addGoal(final GoalDTO goal);
 
     Goal deleteGoal(final int id);
 
-    void updateGoal(final int id, final Goal goal);
+    void updateGoal(final int id, final GoalDTO goal);
 
     void addProgress(final Goal goal, final int amount);
 

@@ -1,5 +1,6 @@
 package io.github.bodzisz.hmirs.serviceimpl;
 
+import io.github.bodzisz.hmirs.dto.GoalDTO;
 import io.github.bodzisz.hmirs.entity.Goal;
 import io.github.bodzisz.hmirs.entity.Parish;
 import io.github.bodzisz.hmirs.repository.GoalRepository;
@@ -51,13 +52,18 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public Goal addGoal(Goal goal) {
-        int parishId = goal.getParish().getId();
+    public Goal addGoal(GoalDTO goal) {
+        int parishId = goal.parishId();
         Optional<Parish> parish = parishRepository.findById(parishId);
         if (parish.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 String.format("Parish of id=%d was not found", parishId));
-        goal.setParish(parish.get());
-        return goalRepository.save(goal);
+        Goal newGoal = new Goal();
+        newGoal.setId(0);
+        newGoal.setParish(parish.get());
+        newGoal.setGoal_title(goal.goalTitle());
+        newGoal.setAmount(goal.amount());
+        newGoal.setGathered(goal.gathered());
+        return goalRepository.save(newGoal);
     }
 
     @Override
@@ -70,10 +76,13 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public void updateGoal(final int id, final Goal goal) {
+    public void updateGoal(final int id, final GoalDTO goal) {
         Goal existingGoal = goalRepository.findById(id).orElse(null);
-        if (existingGoal != null && existingGoal.getId()==goal.getId()) {
-            goalRepository.save(goal);
+        if (existingGoal != null) {
+            existingGoal.setGoal_title(goal.goalTitle());
+            existingGoal.setAmount(goal.amount());
+            existingGoal.setGathered(goal.gathered());
+            goalRepository.save(existingGoal);
         }
         else{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
