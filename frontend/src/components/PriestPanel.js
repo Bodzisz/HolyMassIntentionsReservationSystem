@@ -17,7 +17,6 @@ import { useEffect, useRef, useState } from "react";
 import useFetch from "../api/useFetch";
 import { formatDate } from "../util/dateFormatter";
 import { config } from "../config/config";
-import { getUser } from "../context/user";
 import { ProgressCardColored } from "./Progress";
 import SliderInput from "./OfferingBar";
 import { getHeaders } from "../util/requestHeaderProvider";
@@ -48,7 +47,10 @@ function PriestPanel() {
   }, [selectedChurch]);
 
   const getGoals = () => {
-    fetch("http://localhost:8080/goals")
+    fetch("http://localhost:8080/goals", {
+      method: "GET",
+      headers: getHeaders(),
+    })
       .then((response) => response.json())
       .then((data) => {
         setGoals(data);
@@ -67,12 +69,7 @@ function PriestPanel() {
       console.log(body);
       fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${
-            getUser() === null ? null : getUser().jwtToken
-          }`,
-        },
+        headers: getHeaders(),
         body: JSON.stringify(body),
       })
         .then((response) => {
@@ -335,11 +332,10 @@ function PriestPanel() {
                         onClickUpdateGoal(
                           config.apiBaseUrl + "goals/" + selectedGoal.id,
                           {
-                            goal_title: goalTitleRef.current.value,
+                            goalTitle: goalTitleRef.current.value,
                             amount: parseInt(goalAmountRef.current.value),
                             gathered: 0,
-                            parish: selectedGoal.parish,
-                            id: selectedGoal.id,
+                            parishId: selectedGoal.parish.id,
                           }
                         );
                       }}
